@@ -3,6 +3,7 @@ path = require 'path'
 async = require 'async'
 gutil = require 'gulp-util'
 through = require 'through2'
+coffee = require 'gulp-coffee'
 mt2amd = require 'gulp-mt2amd'
 amdDependency = require 'gulp-amd-dependency'
 
@@ -27,7 +28,7 @@ getBodyDeps = (def) ->
 		deps: deps
 	}
 
-fixDefineParams = (def, depId, baseId) ->
+fixDefineParams = (def, depId) ->
 	def = getBodyDeps def
 	bodyDeps = def.deps
 	fix = (full, b, d, quote, definedId, deps) ->
@@ -41,7 +42,6 @@ fixDefineParams = (def, depId, baseId) ->
 			id = definedId
 		else
 			id = depId || ''
-			id = if id and baseId then path.join path.dirname(baseId), id else id
 			if id and not (/^\./).test id
 				id = './' + id
 		[b, d, id && ("'" + getUnixStylePath(id) + "', "), deps || "['require', 'exports', 'module'], "].join ''
@@ -85,11 +85,11 @@ module.exports.bundle = (file, opt = {}) ->
 					(depFile, cb) ->
 						if depFile.path is file.path
 							if baseFile
-								depId = path.relative(path.dirname(baseFile.path), depFile.path).replace /\.js$/, ''
+								depId = path.relative(path.dirname(baseFile.path), depFile.path).replace /\.(js|coffee)$/, ''
 							else
 								depId = ''
 						else
-							depId = path.relative(path.dirname((baseFile || file).path), depFile.path).replace /\.js$/, ''
+							depId = path.relative(path.dirname((baseFile || file).path), depFile.path).replace /\.(js|coffee)$/, ''
 						if (/\.tpl\.html$/).test depFile.path
 							mt2amd.compile(depFile).then(
 								(depFile) ->
@@ -98,6 +98,15 @@ module.exports.bundle = (file, opt = {}) ->
 								(err) ->
 									reject err
 							)
+						else if (/\.coffee$/).test depFile.path
+							coffeeStream = coffee opt.coffeeOpt
+							coffeeStream.pipe through.obj(
+								(depFile, enc, next) ->
+									content.push fixDefineParams(depFile.contents.toString('utf8'), depId)
+									cb()
+									next()
+							)
+							coffeeStream.end depFile
 						else
 							content.push fixDefineParams(depFile.contents.toString('utf8'), depId)
 							cb()
