@@ -91,7 +91,7 @@ module.exports.bundle = (file, opt = {}) ->
 						else
 							depId = path.relative(path.dirname((baseFile || file).path), depFile.path).replace /\.(js|coffee)$/, ''
 						if (/\.tpl\.html$/).test depFile.path
-							mt2amd.compile(depFile).then(
+							mt2amd.compile(depFile, beautify: opt.beautifyTemplate).then(
 								(depFile) ->
 									content.push fixDefineParams(depFile.contents.toString('utf8'), depId)
 									cb()
