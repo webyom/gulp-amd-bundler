@@ -112,6 +112,10 @@ module.exports.bundle = (file, opt = {}) ->
 							cb()
 					(err) ->
 						return reject err if err
+						if (/\.tpl\.html$/).test file.path
+							file.path = file.path + '.js'
+						else
+							file.path = file.path.replace /\.coffee$/, '.js'
 						file.contents = new Buffer content.join EOL + EOL
 						resolve file
 				)
