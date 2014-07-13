@@ -16,13 +16,14 @@ getBodyDeps = (def) ->
 	deps = []
 	got = {}
 	def = def.replace /(^|[^.]+?)\brequire\s*\(\s*(["'])([^"']+?)\2\s*\)/mg, (full, lead, quote, dep) ->
-		pDep = dep.replace /\{\{([^{}]+)\}\}/g, "' + $1 + '"
-		got[dep] || deps.push pDep
+		pDep = dep.replace /\{\{([^{}]+)\}\}/g, quote + ' + $1 + ' + quote
+		qDep = quote + pDep + quote
+		got[dep] || deps.push qDep
 		got[dep] = 1
 		if pDep is dep
 			full
 		else
-			lead + 'require(' + quote + pDep + quote + ')'
+			lead + 'require(' + qDep + ')'
 	{
 		def: def
 		deps: deps
@@ -33,7 +34,7 @@ fixDefineParams = (def, depId) ->
 	bodyDeps = def.deps
 	fix = (full, b, d, quote, definedId, deps) ->
 		if bodyDeps.length
-			bodyDeps = "'" + bodyDeps.join("', '") + "'"
+			bodyDeps = bodyDeps.join(', ')
 			if deps
 				deps = deps.replace /]$/, ', ' + bodyDeps + ']'
 			else
