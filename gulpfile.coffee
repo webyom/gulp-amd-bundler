@@ -8,7 +8,6 @@ gulp.task 'compile', ->
 
 gulp.task 'example', ->
 	bundler = require './lib/index'
-	through = require 'through2'
 	gulp.src('example/src/index.js')
 		.pipe bundler beautifyTemplate: true
 		.pipe gulp.dest('example/dest')
