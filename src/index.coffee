@@ -94,7 +94,7 @@ module.exports.bundle = (file, opt = {}) ->
 						if (/\.tpl\.html$/).test depFile.path
 							mt2amd.compile(depFile, beautify: opt.beautifyTemplate).then(
 								(depFile) ->
-									content.push fixDefineParams(depFile.contents.toString('utf8'), depId)
+									content.push fixDefineParams(depFile.contents.toString(), depId)
 									cb()
 								(err) ->
 									reject err
@@ -103,13 +103,13 @@ module.exports.bundle = (file, opt = {}) ->
 							coffeeStream = coffee opt.coffeeOpt
 							coffeeStream.pipe through.obj(
 								(depFile, enc, next) ->
-									content.push fixDefineParams(depFile.contents.toString('utf8'), depId)
+									content.push fixDefineParams(depFile.contents.toString(), depId)
 									cb()
 									next()
 							)
 							coffeeStream.end depFile
 						else
-							content.push fixDefineParams(depFile.contents.toString('utf8'), depId)
+							content.push fixDefineParams(depFile.contents.toString(), depId)
 							cb()
 					(err) ->
 						return reject err if err
