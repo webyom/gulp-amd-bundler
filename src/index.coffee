@@ -96,7 +96,7 @@ module.exports.bundle = (file, opt = {}) ->
 						else
 							trace = ''
 						if (/\.tpl\.html$/).test depFile.path
-							mt2amd.compile(depFile, beautify: opt.beautifyTemplate).then(
+							mt2amd.compile(depFile, beautify: opt.beautifyTemplate, trace: opt.trace).then(
 								(depFile) ->
 									content.push trace + fixDefineParams(depFile, depId)
 									cb()
