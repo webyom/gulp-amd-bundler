@@ -9,7 +9,9 @@ gulp.task 'compile', ->
 gulp.task 'example', ->
 	bundler = require './lib/index'
 	gulp.src('example/src/index.js')
-		.pipe bundler beautifyTemplate: true
+		.pipe bundler
+			beautifyTemplate: true
+			trace: true
 		.pipe gulp.dest('example/dest')
 
 gulp.task 'default', ['compile']

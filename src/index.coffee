@@ -29,8 +29,8 @@ getBodyDeps = (def) ->
 		deps: deps
 	}
 
-fixDefineParams = (def, depId) ->
-	def = getBodyDeps def
+fixDefineParams = (file, depId) ->
+	def = getBodyDeps file.contents.toString()
 	bodyDeps = def.deps
 	fix = (full, b, d, quote, definedId, deps) ->
 		if bodyDeps.length
@@ -91,10 +91,14 @@ module.exports.bundle = (file, opt = {}) ->
 								depId = ''
 						else
 							depId = path.relative(path.dirname((baseFile || file).path), depFile.path).replace /\.(js|coffee)$/, ''
+						if opt.trace
+							trace = '/* trace:' + path.relative(process.cwd(), depFile.path) + ' */' + EOL
+						else
+							trace = ''
 						if (/\.tpl\.html$/).test depFile.path
 							mt2amd.compile(depFile, beautify: opt.beautifyTemplate).then(
 								(depFile) ->
-									content.push fixDefineParams(depFile.contents.toString(), depId)
+									content.push trace + fixDefineParams(depFile, depId)
 									cb()
 								(err) ->
 									reject err
@@ -103,13 +107,13 @@ module.exports.bundle = (file, opt = {}) ->
 							coffeeStream = coffee opt.coffeeOpt
 							coffeeStream.pipe through.obj(
 								(depFile, enc, next) ->
-									content.push fixDefineParams(depFile.contents.toString(), depId)
+									content.push trace + fixDefineParams(depFile, depId)
 									cb()
 									next()
 							)
 							coffeeStream.end depFile
 						else
-							content.push fixDefineParams(depFile.contents.toString(), depId)
+							content.push trace + fixDefineParams(depFile, depId)
 							cb()
 					(err) ->
 						return reject err if err

@@ -1,3 +1,4 @@
+/* trace:example/src/index.js */
 define(['require', 'exports', 'module', './mod-a', './mod-b', 'lang/' + G.LANG + '/common'], function(require, exports, module, modA) {
 	var modB = require('./mod-b');
 	var lang = require('lang/' + G.LANG + '/common');
@@ -5,12 +6,14 @@ define(['require', 'exports', 'module', './mod-a', './mod-b', 'lang/' + G.LANG +
 	return {};
 });
 
+/* trace:example/src/mod-a.js */
 define('./mod-a', ['require', 'exports', 'module', './sub/mod-c'], function(require, exports, module) {
 var modC = require('./sub/mod-c');
 
 module.exports = {};
 });
 
+/* trace:example/src/sub/mod-c.js */
 define('./sub/mod-c', ['require', 'exports', 'module', '../mod-a', './mod-d', './tpl-a.tpl.html'], function(require) {
 	var modA = require('../mod-a');
 	var modD = require('./mod-d');
@@ -19,6 +22,7 @@ define('./sub/mod-c', ['require', 'exports', 'module', '../mod-a', './mod-d', '.
 	return {};
 });
 
+/* trace:example/src/sub/mod-d.coffee */
 define('./sub/mod-d', ['require', 'exports', 'module', '../mod-b'], function(require, exports, module) {
 (function() {
   var modB;
@@ -31,7 +35,8 @@ define('./sub/mod-d', ['require', 'exports', 'module', '../mod-b'], function(req
 
 });
 
-define('./sub/tpl-a.tpl.html', ['require', 'exports', 'module', '../mod-b'], function(require, exports, module) {
+/* trace:example/src/sub/tpl-a.tpl.html */
+define('./sub/tpl-a.tpl.html', ['require', 'exports', 'module', "../mod-b"], function(require, exports, module) {
     function $encodeHtml(str) {
         return (str + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/`/g, "&#96;").replace(/'/g, "&#39;").replace(/"/g, "&quot;");
     }
@@ -49,6 +54,7 @@ define('./sub/tpl-a.tpl.html', ['require', 'exports', 'module', '../mod-b'], fun
     };
 });
 
+/* trace:example/src/mod-b.js */
 define('./mod-b', ['require', 'exports', 'module', './sub/mod-c'], function(require) {
 	var modC = require('./sub/mod-c');
 
