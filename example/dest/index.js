@@ -47,6 +47,7 @@ define('./sub/tpl-a.tpl.html', ['require', 'exports', 'module', "../mod-b"], fun
             _$out_.push(str);
         };
         with ($data) {
+            /* trace:example/src/sub/tpl-a.tpl.html */
             var modB = require("../mod-b");
             _$out_.push("<div>Hello</div>");
         }
