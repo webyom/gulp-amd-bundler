@@ -29,7 +29,7 @@ getBodyDeps = (def) ->
 		deps: deps
 	}
 
-fixDefineParams = (file, depId) ->
+fixDefineParams = (file, depId, userDefinedBaseDir) ->
 	def = getBodyDeps file.contents.toString()
 	bodyDeps = def.deps
 	fix = (full, b, d, quote, definedId, deps) ->
@@ -43,7 +43,7 @@ fixDefineParams = (file, depId) ->
 			id = definedId
 		else
 			id = depId || ''
-			if id and not (/^\./).test id
+			if id and not userDefinedBaseDir and not (/^\./).test(id)
 				id = './' + id
 		[b, d, id && ("'" + getUnixStylePath(id) + "', "), deps || "['require', 'exports', 'module'], "].join ''
 	if not (/(^|[^.]+?)\bdefine\s*\(/).test(def.def) and (/(^|[^.]+?)\bmodule\.exports\b/).test(def.def)
@@ -70,6 +70,9 @@ module.exports = (opt = {}) ->
 
 module.exports.bundle = (file, opt = {}) ->
 	baseFile = opt.baseFile
+	baseDir = opt.baseDir
+	if baseFile and not baseDir
+		baseDir = path.dirname(baseFile.path)
 	Q.Promise (resolve, reject) ->
 		return reject new gutil.PluginError('gulp-amd-bundler', 'File can\'t be null') if file.isNull()
 		return reject new gutil.PluginError('gulp-amd-bundler', 'Streams not supported') if file.isStream()
@@ -85,12 +88,12 @@ module.exports.bundle = (file, opt = {}) ->
 					dependFiles
 					(depFile, cb) ->
 						if depFile.path is file.path
-							if baseFile
-								depId = path.relative(path.dirname(baseFile.path), depFile.path).replace /\.(js|coffee)$/, ''
+							if baseDir
+								depId = path.relative(baseDir, depFile.path).replace /\.(js|coffee)$/, ''
 							else
 								depId = ''
 						else
-							depId = path.relative(path.dirname((baseFile || file).path), depFile.path).replace /\.(js|coffee)$/, ''
+							depId = path.relative(baseDir || path.dirname(file.path), depFile.path).replace /\.(js|coffee)$/, ''
 						if opt.trace
 							trace = '/* trace:' + path.relative(process.cwd(), depFile.path) + ' */' + EOL
 						else
@@ -98,7 +101,7 @@ module.exports.bundle = (file, opt = {}) ->
 						if (/\.tpl\.html$/).test depFile.path
 							mt2amd.compile(depFile, beautify: opt.beautifyTemplate, trace: opt.trace).then(
 								(depFile) ->
-									content.push trace + fixDefineParams(depFile, depId)
+									content.push trace + fixDefineParams(depFile, depId, !!opt.baseDir)
 									cb()
 								(err) ->
 									reject err
@@ -107,13 +110,13 @@ module.exports.bundle = (file, opt = {}) ->
 							coffeeStream = coffee opt.coffeeOpt
 							coffeeStream.pipe through.obj(
 								(depFile, enc, next) ->
-									content.push trace + fixDefineParams(depFile, depId)
+									content.push trace + fixDefineParams(depFile, depId, !!opt.baseDir)
 									cb()
 									next()
 							)
 							coffeeStream.end depFile
 						else
-							content.push trace + fixDefineParams(depFile, depId)
+							content.push trace + fixDefineParams(depFile, depId, !!opt.baseDir)
 							cb()
 					(err) ->
 						return reject err if err
