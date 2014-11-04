@@ -114,6 +114,10 @@ module.exports.bundle = (file, opt = {}) ->
 									cb()
 									next()
 							)
+							coffeeStream.on 'error', (e) ->
+								console.log 'gulp-amd-bundler Error:', e.message
+								console.log 'file:', file.path
+								console.log e.stack
 							coffeeStream.end depFile
 						else
 							content.push trace + fixDefineParams(depFile, depId, !!opt.baseDir)
