@@ -46,7 +46,7 @@ fixDefineParams = (file, depId, userDefinedBaseDir) ->
 			if id and not userDefinedBaseDir and not (/^\./).test(id)
 				id = './' + id
 		[b, d, id && ("'" + getUnixStylePath(id) + "', "), deps || "['require', 'exports', 'module'], "].join ''
-	if not (/(^|[^.]+?)\bdefine\s*\(/).test(def.def) and (/(^|[^.]+?)\bmodule\.exports\b/).test(def.def)
+	if not (/(^|[^.]+?)\bdefine\s*\(/).test(def.def) and (/(^|[^.]+?)\bmodule\.exports\s*=[^=]/).test(def.def)
 		def = [
 			fix('define(', '', 'define(') + 'function(require, exports, module) {'
 			def.def
