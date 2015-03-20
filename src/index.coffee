@@ -92,6 +92,8 @@ module.exports.bundle = (file, opt = {}) ->
 								depId = path.relative(baseDir, depFile.path).replace /\.(js|coffee)$/, ''
 							else
 								depId = ''
+							# remove inline templates srouce code
+							file.contents = new Buffer file.contents.toString().split(/(?:\r\n|\n|\r)__END__\s*(?:\r\n|\n|\r|$)/)[0]
 						else
 							depId = path.relative(baseDir || path.dirname(file.path), depFile.path).replace /\.(js|coffee)$/, ''
 						if opt.trace
