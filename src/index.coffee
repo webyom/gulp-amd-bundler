@@ -6,6 +6,8 @@ through = require 'through2'
 coffee = require 'gulp-coffee'
 mt2amd = require 'gulp-mt2amd'
 amdDependency = require 'gulp-amd-dependency'
+jsxTransform = require 'jsx-transform'
+coffeeReactTransform = require 'coffee-react-transform'
 
 EOL = '\n'
 
@@ -29,8 +31,8 @@ getBodyDeps = (def) ->
 		deps: deps
 	}
 
-fixDefineParams = (file, depId, userDefinedBaseDir) ->
-	def = getBodyDeps file.contents.toString()
+fixDefineParams = (def, depId, userDefinedBaseDir) ->
+	def = getBodyDeps def
 	bodyDeps = def.deps
 	fix = (full, b, d, quote, definedId, deps) ->
 		if bodyDeps.length
@@ -103,16 +105,20 @@ module.exports.bundle = (file, opt = {}) ->
 						if (/\.tpl\.html$/).test depFile.path
 							mt2amd.compile(depFile, postcss: opt.postcss, base64img: opt.base64img, beautify: opt.beautifyTemplate, trace: opt.trace).then(
 								(depFile) ->
-									content.push trace + fixDefineParams(depFile, depId, !!opt.baseDir)
+									content.push trace + fixDefineParams(depFile.contents.toString(), depId, !!opt.baseDir)
 									cb()
 								(err) ->
 									reject err
 							)
 						else if (/\.coffee$/).test depFile.path
+							depContent = depFile.contents.toString()
+							if (/(^|\r\n|\n|\r)##\s*@jsx\s/).test depContent
+								depContent = coffeeReactTransform depContent
+								depFile.contents = new Buffer depContent
 							coffeeStream = coffee opt.coffeeOpt
 							coffeeStream.pipe through.obj(
 								(depFile, enc, next) ->
-									content.push trace + fixDefineParams(depFile, depId, !!opt.baseDir)
+									content.push trace + fixDefineParams(depFile.contents.toString(), depId, !!opt.baseDir)
 									cb()
 									next()
 							)
@@ -122,7 +128,12 @@ module.exports.bundle = (file, opt = {}) ->
 								console.log e.stack
 							coffeeStream.end depFile
 						else
-							content.push trace + fixDefineParams(depFile, depId, !!opt.baseDir)
+							depContent = depFile.contents.toString()
+							if (/(^|\r\n|\n|\r)\/\*\*\s*@jsx\s/).test depContent
+								depContent = jsxTransform.transform depContent,
+									ignoreDocblock: true
+									jsx: 'React.createElement'
+							content.push trace + fixDefineParams(depContent, depId, !!opt.baseDir)
 							cb()
 					(err) ->
 						return reject err if err

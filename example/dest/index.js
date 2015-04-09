@@ -11,9 +11,22 @@ define(['require', 'exports', 'module', './mod-a', './mod-b', 'lang/' + G.LANG +
 
 /* trace:example/src/mod-a.js */
 define('./mod-a', ['require', 'exports', 'module', './sub/mod-c'], function(require, exports, module) {
+/** @jsx */
 var modC = require('./sub/mod-c');
 
-module.exports = {};
+var ModA = react.createClass({
+	render: function() {
+		return (
+			React.createElement('div', {className: "commentBox"}, [
+				React.createElement('p', null, [
+					"Hello, world! I am a CommentBox."
+				])
+			])
+		);
+	}
+});
+
+module.exports = ModA;
 });
 
 /* trace:example/src/sub/mod-c.js */
@@ -28,11 +41,19 @@ define('./sub/mod-c', ['require', 'exports', 'module', '../mod-a', './mod-d', '.
 /* trace:example/src/sub/mod-d.coffee */
 define('./sub/mod-d', ['require', 'exports', 'module', '../mod-b'], function(require, exports, module) {
 (function() {
-  var modB;
+  var ModD, modB;
 
   modB = require('../mod-b');
 
-  module.exports = {};
+  ModD = react.createClass({
+    render: function() {
+      return React.createElement("div", {
+        "className": "commentBox"
+      }, React.createElement("p", null, "\t\t\t\tHello, world! I am a CommentBox."));
+    }
+  });
+
+  module.exports = ModD;
 
 }).call(this);
 
