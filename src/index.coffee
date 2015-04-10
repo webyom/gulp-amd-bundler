@@ -102,7 +102,7 @@ module.exports.bundle = (file, opt = {}) ->
 							trace = '/* trace:' + path.relative(process.cwd(), depFile.path) + ' */' + EOL
 						else
 							trace = ''
-						if (/\.tpl\.html$/).test depFile.path
+						if (/\.(tpl\.html|css|less|scss)$/).test depFile.path
 							mt2amd.compile(depFile, postcss: opt.postcss, base64img: opt.base64img, beautify: opt.beautifyTemplate, trace: opt.trace).then(
 								(depFile) ->
 									content.push trace + fixDefineParams(depFile.contents.toString(), depId, !!opt.baseDir)

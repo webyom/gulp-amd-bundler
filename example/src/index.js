@@ -3,6 +3,9 @@ define(['require', 'exports', 'module', './mod-a'], function(require, exports, m
 	var lang = require('lang/{{G.LANG}}/common');
 	var tplA = require('./inline-tpl-a.tpl.html');
 	var tplB = require('./inline-tpl-b.tpl.html');
+	var css = require('./style.css');
+	var less = require('./style.less');
+	var scss = require('./style.scss');
 
 	return {};
 });
