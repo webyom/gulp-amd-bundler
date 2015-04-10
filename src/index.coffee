@@ -37,7 +37,9 @@ fixDefineParams = (def, depId, userDefinedBaseDir) ->
 	fix = (full, b, d, quote, definedId, deps) ->
 		if bodyDeps.length
 			bodyDeps = bodyDeps.join(', ')
-			if deps
+			if (/^\[\s*\]$/).test deps
+				deps = "['require', 'exports', 'module', " + bodyDeps + "]"
+			else if deps
 				deps = deps.replace /]$/, ', ' + bodyDeps + ']'
 			else
 				deps = "['require', 'exports', 'module', " + bodyDeps + "], "
