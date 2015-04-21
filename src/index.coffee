@@ -17,7 +17,7 @@ getUnixStylePath = (p) ->
 getBodyDeps = (def) ->
 	deps = []
 	got = {}
-	def = def.replace /(^|[^.]+?)\brequire\s*\(\s*(["'])([^"']+?)\2\s*\)/mg, (full, lead, quote, dep) ->
+	def = def.replace /(^|[^.])\brequire\s*\(\s*(["'])([^"']+?)\2\s*\)/mg, (full, lead, quote, dep) ->
 		pDep = dep.replace /\{\{([^{}]+)\}\}/g, quote + ' + $1 + ' + quote
 		qDep = quote + pDep + quote
 		got[dep] || deps.push qDep
@@ -50,14 +50,14 @@ fixDefineParams = (def, depId, userDefinedBaseDir) ->
 			if id and not userDefinedBaseDir and not (/^\./).test(id)
 				id = './' + id
 		[b, d, id && ("'" + getUnixStylePath(id) + "', "), deps || "['require', 'exports', 'module'], "].join ''
-	if not (/(^|[^.]+?)\bdefine\s*\(/).test(def.def) and (/(^|[^.]+?)\bmodule\.exports\s*=[^=]/).test(def.def)
+	if not (/(^|[^.])\bdefine\s*\(/).test(def.def) and (/(^|[^.])\bmodule\.exports\s*=[^=]/).test(def.def)
 		def = [
 			fix('define(', '', 'define(') + 'function(require, exports, module) {'
 			def.def
 			'});'
 		].join EOL
 	else
-		def = def.def.replace /(^|[^.]+?)\b(define\s*\()\s*(?:(["'])([^"'\s]+)\3\s*,\s*)?\s*(\[[^\[\]]*\])?/m, fix
+		def = def.def.replace /(^|[^.])\b(define\s*\()\s*(?:(["'])([^"'\s]+)\3\s*,\s*)?\s*(\[[^\[\]]*\])?/m, fix
 	def
 
 module.exports = (opt = {}) ->
@@ -111,7 +111,7 @@ module.exports.bundle = (file, opt = {}) ->
 									cb()
 								(err) ->
 									reject err
-							)
+							).done()
 						else if (/\.coffee$/).test depFile.path
 							depContent = depFile.contents.toString()
 							if (/(^|\r\n|\n|\r)##\s*@jsx\s/).test depContent
