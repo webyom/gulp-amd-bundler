@@ -11,55 +11,6 @@ coffeeReactTransform = require 'coffee-react-transform'
 
 EOL = '\n'
 
-getUnixStylePath = (p) ->
-	p.split(path.sep).join '/'
-
-getBodyDeps = (def) ->
-	deps = []
-	got = {}
-	def = def.replace /(^|[^.])\brequire\s*\(\s*(["'])([^"']+?)\2\s*\)/mg, (full, lead, quote, dep) ->
-		pDep = dep.replace /\{\{([^{}]+)\}\}/g, quote + ' + $1 + ' + quote
-		qDep = quote + pDep + quote
-		got[dep] || deps.push qDep
-		got[dep] = 1
-		if pDep is dep
-			full
-		else
-			lead + 'require(' + qDep + ')'
-	{
-		def: def
-		deps: deps
-	}
-
-fixDefineParams = (def, depId, userDefinedBaseDir) ->
-	def = getBodyDeps def
-	bodyDeps = def.deps
-	fix = (full, b, d, quote, definedId, deps) ->
-		if bodyDeps.length
-			bodyDeps = bodyDeps.join(', ')
-			if (/^\[\s*\]$/).test deps
-				deps = "['require', 'exports', 'module', " + bodyDeps + "]"
-			else if deps
-				deps = deps.replace /]$/, ', ' + bodyDeps + ']'
-			else
-				deps = "['require', 'exports', 'module', " + bodyDeps + "], "
-		if definedId and not (/^\./).test definedId
-			id = definedId
-		else
-			id = depId || ''
-			if id and not userDefinedBaseDir and not (/^\./).test(id)
-				id = './' + id
-		[b, d, id && ("'" + getUnixStylePath(id) + "', "), deps || "['require', 'exports', 'module'], "].join ''
-	if not (/(^|[^.])\bdefine\s*\(/).test(def.def) and (/(^|[^.])\bmodule\.exports\s*=[^=]/).test(def.def)
-		def = [
-			fix('define(', '', 'define(') + 'function(require, exports, module) {'
-			def.def
-			'});'
-		].join EOL
-	else
-		def = def.def.replace /(^|[^.])\b(define\s*\()\s*(?:(["'])([^"'\s]+)\3\s*,\s*)?\s*(\[[^\[\]]*\])?/m, fix
-	def
-
 module.exports = (opt = {}) ->
 	through.obj (file, enc, next) ->
 		return @emit 'error', new gutil.PluginError('gulp-amd-bundler', 'File can\'t be null') if file.isNull()
@@ -107,7 +58,7 @@ module.exports.bundle = (file, opt = {}) ->
 						if (/\.(tag|riot\.html|tpl\.html|css|less|scss)$/).test depFile.path
 							mt2amd.compile(depFile, riotOpt: opt.riotOpt, postcss: opt.postcss, generateDataUri: opt.generateDataUri, beautify: opt.beautifyTemplate, trace: opt.trace).then(
 								(depFile) ->
-									content.push fixDefineParams(depFile.contents.toString(), depId, !!opt.baseDir)
+									content.push mt2amd.fixDefineParams(depFile.contents.toString(), depId, !!opt.baseDir)
 									cb()
 								(err) ->
 									reject err
@@ -120,7 +71,7 @@ module.exports.bundle = (file, opt = {}) ->
 							coffeeStream = coffee opt.coffeeOpt
 							coffeeStream.pipe through.obj(
 								(depFile, enc, next) ->
-									content.push trace + fixDefineParams(depFile.contents.toString(), depId, !!opt.baseDir)
+									content.push trace + mt2amd.fixDefineParams(depFile.contents.toString(), depId, !!opt.baseDir)
 									cb()
 									next()
 							)
@@ -135,7 +86,7 @@ module.exports.bundle = (file, opt = {}) ->
 								depContent = jsxTransform.transform depContent,
 									ignoreDocblock: true
 									jsx: 'React.createElement'
-							content.push trace + fixDefineParams(depContent, depId, !!opt.baseDir)
+							content.push trace + mt2amd.fixDefineParams(depContent, depId, !!opt.baseDir)
 							cb()
 					(err) ->
 						return reject err if err

@@ -64,7 +64,7 @@ define('./sub/mod-d', ['require', 'exports', 'module', '../mod-b'], function(req
 
 });
 
-define('./sub/tpl-a.tpl.html', ['require', 'exports', 'module', "../mod-b"], function(require, exports, module) {
+define('./sub/tpl-a.tpl.html', ["require", "exports", "module", "../mod-b"], function(require, exports, module) {
     function $encodeHtml(str) {
         return (str + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/`/g, "&#96;").replace(/'/g, "&#39;").replace(/"/g, "&quot;");
     }
@@ -90,7 +90,7 @@ define('./mod-b', ['require', 'exports', 'module', './sub/mod-c'], function(requ
 	return {};
 });
 
-define('./inline-tpl-a.tpl.html', ['require', 'exports', 'module'], function(require, exports, module) {
+define('./inline-tpl-a.tpl.html', [ "require", "exports", "module" ], function(require, exports, module) {
     function $encodeHtml(str) {
         return (str + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/`/g, "&#96;").replace(/'/g, "&#39;").replace(/"/g, "&quot;");
     }
@@ -108,7 +108,7 @@ define('./inline-tpl-a.tpl.html', ['require', 'exports', 'module'], function(req
     };
 });
 
-define('./inline-tpl-b.tpl.html', ['require', 'exports', 'module'], function(require, exports, module) {
+define('./inline-tpl-b.tpl.html', [ "require", "exports", "module" ], function(require, exports, module) {
     function $encodeHtml(str) {
         return (str + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/`/g, "&#96;").replace(/'/g, "&#39;").replace(/"/g, "&quot;");
     }
@@ -154,7 +154,8 @@ define('./style.scss', ['require', 'exports', 'module'], function(require, expor
 });
 
 /* trace:example/src/riot.tag */
-define('./riot', ['require', 'exports', 'module', "jquery"], function(require, exports, module) {
+define('./riot', ["require", "exports", "module", "riot", "jquery"], function(require, exports, module) {
+    riot = require("riot");
     /* trace:example/src/style.less */
     var $ = require("jquery");
     /** @riot coffeescript */
@@ -182,11 +183,12 @@ define('./riot', ['require', 'exports', 'module', "jquery"], function(require, e
         };
     });
     riot.tag("child", "", function(opts) {});
-    module.exports = "todo";
+    module.exports = "riot";
 });
 
 /* trace:example/src/riot-html.riot.html */
-define('./riot-html', ['require', 'exports', 'module', "jquery"], function(require, exports, module) {
+define('./riot-html', ["require", "exports", "module", "riot", "jquery"], function(require, exports, module) {
+    riot = require("riot");
     /* trace:example/src/style.less */
     var $ = require("jquery");
     /** @riot coffeescript */
