@@ -93,7 +93,7 @@ module.exports.bundle = (file, opt = {}) ->
 					(depFile, cb) ->
 						if depFile.path is file.path
 							if baseDir
-								depId = path.relative(baseDir, depFile.path).replace /\.(js|coffee)$/, ''
+								depId = path.relative(baseDir, depFile.path).replace /\.(tag|riot\.html|js|coffee)$/, ''
 							else
 								depId = ''
 							# remove inline templates srouce code
