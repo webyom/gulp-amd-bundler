@@ -99,15 +99,15 @@ module.exports.bundle = (file, opt = {}) ->
 							# remove inline templates srouce code
 							file.contents = new Buffer file.contents.toString().split(/(?:\r\n|\n|\r)__END__\s*(?:\r\n|\n|\r|$)/)[0]
 						else
-							depId = path.relative(baseDir || path.dirname(file.path), depFile.path).replace /\.(js|coffee)$/, ''
+							depId = path.relative(baseDir || path.dirname(file.path), depFile.path).replace /\.(tag|riot\.html|js|coffee)$/, ''
 						if opt.trace
 							trace = '/* trace:' + path.relative(process.cwd(), depFile.path) + ' */' + EOL
 						else
 							trace = ''
-						if (/\.(tpl\.html|css|less|scss)$/).test depFile.path
-							mt2amd.compile(depFile, postcss: opt.postcss, generateDataUri: opt.generateDataUri, beautify: opt.beautifyTemplate, trace: opt.trace).then(
+						if (/\.(tag|riot\.html|tpl\.html|css|less|scss)$/).test depFile.path
+							mt2amd.compile(depFile, riotOpt: opt.riotOpt, postcss: opt.postcss, generateDataUri: opt.generateDataUri, beautify: opt.beautifyTemplate, trace: opt.trace).then(
 								(depFile) ->
-									content.push trace + fixDefineParams(depFile.contents.toString(), depId, !!opt.baseDir)
+									content.push fixDefineParams(depFile.contents.toString(), depId, !!opt.baseDir)
 									cb()
 								(err) ->
 									reject err
