@@ -56,7 +56,7 @@ module.exports.bundle = (file, opt = {}) ->
 						else
 							trace = ''
 						if (/\.(tag|riot\.html|tpl\.html|css|less|scss)$/).test depFile.path
-							mt2amd.compile(depFile, riotOpt: opt.riotOpt, postcss: opt.postcss, generateDataUri: opt.generateDataUri, beautify: opt.beautifyTemplate, trace: opt.trace).then(
+							mt2amd.compile(depFile, riotOpt: opt.riotOpt, postcss: opt.postcss, generateDataUri: opt.generateDataUri, cssSprite: opt.cssSprite, beautify: opt.beautifyTemplate, trace: opt.trace).then(
 								(depFile) ->
 									content.push mt2amd.fixDefineParams(depFile.contents.toString(), depId, !!opt.baseDir)
 									cb()
