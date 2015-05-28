@@ -44,13 +44,13 @@ module.exports.bundle = (file, opt = {}) ->
 					(depFile, cb) ->
 						if depFile.path is file.path
 							if baseDir
-								depId = path.relative(baseDir, depFile.path).replace /\.(tag|riot\.html|js|coffee)$/, ''
+								depId = path.relative(baseDir, depFile.path).replace /\.(tag|riot\.html|js|jsx|coffee)$/, ''
 							else
 								depId = ''
 							# remove inline templates srouce code
 							file.contents = new Buffer file.contents.toString().split(/(?:\r\n|\n|\r)__END__\s*(?:\r\n|\n|\r|$)/)[0]
 						else
-							depId = path.relative(baseDir || path.dirname(file.path), depFile.path).replace /\.(tag|riot\.html|js|coffee)$/, ''
+							depId = path.relative(baseDir || path.dirname(file.path), depFile.path).replace /\.(tag|riot\.html|js|jsx|coffee)$/, ''
 						if opt.trace
 							trace = '/* trace:' + path.relative(process.cwd(), depFile.path) + ' */' + EOL
 						else
@@ -82,7 +82,7 @@ module.exports.bundle = (file, opt = {}) ->
 							coffeeStream.end depFile
 						else
 							depContent = depFile.contents.toString()
-							if (/(^|\r\n|\n|\r)\/\*\*\s*@jsx\s/).test depContent
+							if (/\.jsx$/).test(depFile.path) or (/(^|\r\n|\n|\r)\/\*\*\s*@jsx\s/).test(depContent)
 								depContent = jsxTransform.transform depContent,
 									ignoreDocblock: true
 									jsx: 'React.createElement'
