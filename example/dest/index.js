@@ -24,11 +24,11 @@ var modC = require('./sub/mod-c');
 var ModA = react.createClass({
 	render: function() {
 		return (
-			React.createElement('div', {className: "commentBox"}, [
-				React.createElement('p', null, [
+			React.createElement("div", {className: "commentBox"}, 
+				React.createElement("p", null, 
 					"Hello, world! I am a CommentBox."
-				])
-			])
+				)
+			)
 		);
 	}
 });
@@ -97,11 +97,11 @@ define('./mod-x', ['require', 'exports', 'module'], function(require, exports, m
 var ModX = react.createClass({
 	render: function() {
 		return (
-			React.createElement('div', {className: "commentBox"}, [
-				React.createElement('p', null, [
+			React.createElement("div", {className: "commentBox"}, 
+				React.createElement("p", null, 
 					"Hello, world! I am a CommentBox."
-				])
-			])
+				)
+			)
 		);
 	}
 });

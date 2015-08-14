@@ -6,7 +6,7 @@ through = require 'through2'
 coffee = require 'gulp-coffee'
 mt2amd = require 'gulp-mt2amd'
 amdDependency = require 'gulp-amd-dependency'
-jsxTransform = require 'jsx-transform'
+reactTools = require 'react-tools'
 coffeeReactTransform = require 'coffee-react-transform'
 
 EOL = '\n'
@@ -83,9 +83,7 @@ module.exports.bundle = (file, opt = {}) ->
 						else
 							depContent = depFile.contents.toString()
 							if (/\.jsx$/).test(depFile.path) or (/(^|\r\n|\n|\r)\/\*\*\s*@jsx\s/).test(depContent)
-								depContent = jsxTransform.transform depContent,
-									ignoreDocblock: true
-									jsx: 'React.createElement'
+								depContent = reactTools.transform depContent, opt.reactOpt
 							content.push trace + mt2amd.fixDefineParams(depContent, depId, !!opt.baseDir)
 							cb()
 					(err) ->
