@@ -1,7 +1,8 @@
 /* trace:example/src/index.js */
-define(['require', 'exports', 'module', './mod-a', './mod-b', './mod-x', 'lang/' + G.LANG + '/common', './inline-tpl-a.tpl.html', './inline-tpl-b.tpl.html', './sprite.css', './style.css', './style.less', './style.scss', './riot', './riot-html'], function(require, exports, module, modA) {
+define(['require', 'exports', 'module', './mod-a', './mod-b', './mod-x', './mod-y.react', 'lang/' + G.LANG + '/common', './inline-tpl-a.tpl.html', './inline-tpl-b.tpl.html', './sprite.css', './style.css', './style.less', './style.scss', './riot', './riot-html'], function(require, exports, module, modA) {
 	var modB = require('./mod-b');
 	var modX = require('./mod-x');
+	var modY = require('./mod-y.react');
 	var lang = require('lang/' + G.LANG + '/common');
 	var tplA = require('./inline-tpl-a.tpl.html');
 	var tplB = require('./inline-tpl-b.tpl.html');
@@ -37,9 +38,10 @@ module.exports = ModA;
 });
 
 /* trace:example/src/sub/mod-c.js */
-define('./sub/mod-c', ['require', 'exports', 'module', '../mod-a', './mod-d', './tpl-a.tpl.html'], function(require) {
+define('./sub/mod-c', ['require', 'exports', 'module', '../mod-a', './mod-d', './mod-e.react', './tpl-a.tpl.html'], function(require) {
 	var modA = require('../mod-a');
 	var modD = require('./mod-d');
+	var modE = require('./mod-e.react');
 	var tplA = require('./tpl-a.tpl.html');
 
 	return {};
@@ -61,6 +63,27 @@ define('./sub/mod-d', ['require', 'exports', 'module', '../mod-b'], function(req
   });
 
   module.exports = ModD;
+
+}).call(this);
+
+});
+
+/* trace:example/src/sub/mod-e.react.coffee */
+define('./sub/mod-e.react', ['require', 'exports', 'module', '../mod-b'], function(require, exports, module) {
+(function() {
+  var ModE, modB;
+
+  modB = require('../mod-b');
+
+  ModE = react.createClass({
+    render: function() {
+      return React.createElement("div", {
+        "className": "commentBox"
+      }, React.createElement("p", null, "\t\t\t\tHello, world! I am a CommentBox."));
+    }
+  });
+
+  module.exports = ModE;
 
 }).call(this);
 
@@ -106,7 +129,24 @@ var ModX = react.createClass({
 	}
 });
 
-module.exports = ModA;
+module.exports = ModX;
+});
+
+/* trace:example/src/mod-y.react.js */
+define('./mod-y.react', ['require', 'exports', 'module'], function(require, exports, module) {
+var ModY = react.createClass({
+	render: function() {
+		return (
+			React.createElement("div", {className: "commentBox"}, 
+				React.createElement("p", null, 
+					"Hello, world! I am a CommentBox."
+				)
+			)
+		);
+	}
+});
+
+module.exports = ModY;
 });
 
 define('./inline-tpl-a.tpl.html', [ "require", "exports", "module" ], function(require, exports, module) {

@@ -1,4 +1,4 @@
-var ModX = react.createClass({
+var ModY = react.createClass({
 	render: function() {
 		return (
 			<div className="commentBox">
@@ -10,4 +10,4 @@ var ModX = react.createClass({
 	}
 });
 
-module.exports = ModX;
+module.exports = ModY;

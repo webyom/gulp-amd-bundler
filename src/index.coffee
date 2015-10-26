@@ -65,7 +65,7 @@ module.exports.bundle = (file, opt = {}) ->
 							).done()
 						else if (/\.coffee$/).test depFile.path
 							depContent = depFile.contents.toString()
-							if (/(^|\r\n|\n|\r)##\s*@jsx\s/).test depContent
+							if (/\.react\.coffee$/).test(depFile.path) or (/(^|\r\n|\n|\r)##\s*@jsx\s/).test(depContent)
 								depContent = coffeeReactTransform depContent
 								depFile.contents = new Buffer depContent
 							coffeeStream = coffee opt.coffeeOpt
@@ -82,7 +82,7 @@ module.exports.bundle = (file, opt = {}) ->
 							coffeeStream.end depFile
 						else
 							depContent = depFile.contents.toString()
-							if (/\.jsx$/).test(depFile.path) or (/(^|\r\n|\n|\r)\/\*\*\s*@jsx\s/).test(depContent)
+							if (/\.(react\.js|jsx)$/).test(depFile.path) or (/(^|\r\n|\n|\r)\/\*\*\s*@jsx\s/).test(depContent)
 								depContent = reactTools.transform depContent, opt.reactOpt
 							content.push trace + mt2amd.fixDefineParams(depContent, depId, !!opt.baseDir)
 							cb()
