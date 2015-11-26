@@ -22,6 +22,7 @@ gulp.task 'example', ['sprite'], ->
 				requireBaseDir: 'example/dest'
 				outDir: 'example/dest/lib'
 				inDir: './'
+				suffix: '-main'
 				minifyJS: true
 				overWrite: true
 			cssSprite: 

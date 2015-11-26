@@ -31,6 +31,8 @@ _findVendorInDir = (inDir, outDir, name, opt, callback) ->
 			mainPath = mainPath + '.js' if path.extname(mainPath) isnt '.js'
 			if fs.existsSync mainPath
 				outPath = path.resolve outDir, path.basename(mainPath)
+				if opt.suffix
+					outPath = outPath.replace /\.js$/, opt.suffix + '.js'
 				if not fs.existsSync(outPath) or opt.overWrite
 					content = fs.readFileSync(mainPath).toString()
 					if opt.minifyJS
