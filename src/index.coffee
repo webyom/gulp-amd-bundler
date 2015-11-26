@@ -23,38 +23,36 @@ logErr = (err, filePath) ->
 
 _findVendorInDir = (inDir, outDir, name, opt, callback) ->
 	moduleDir = path.resolve inDir, name
-	packagePath = path.resolve moduleDir, 'package.json'
-	if fs.existsSync packagePath
-		packageObj = require packagePath
-		if packageObj.main
-			if opt.mainMap?[name]
-				mainPath = path.resolve moduleDir, opt.mainMap?[name]
-			else
+	if opt.mainMap?[name]
+		mainPath = path.resolve moduleDir, opt.mainMap[name]
+	if not mainPath
+		packagePath = path.resolve moduleDir, 'package.json'
+		if fs.existsSync packagePath
+			packageObj = require packagePath
+			if packageObj.main
 				mainPath = path.resolve moduleDir, packageObj.main
-			mainPath = mainPath + '.js' if path.extname(mainPath) isnt '.js'
-			if fs.existsSync mainPath
-				if opt.suffix
-					outPath = path.resolve outDir, name + opt.suffix + '.js'
+	mainPath = mainPath + '.js' if mainPath and path.extname(mainPath) isnt '.js'
+	if mainPath and fs.existsSync mainPath
+		if opt.suffix
+			outPath = path.resolve outDir, name + opt.suffix + '.js'
+		else
+			outPath = path.resolve outDir, name + '.js'
+		if not fs.existsSync(outPath) or opt.overWrite
+			content = fs.readFileSync(mainPath).toString()
+			if opt.minifyJS
+				if typeof opt.minifyJS is 'object'
+					minifyJS = opt.minifyJS
 				else
-					outPath = path.resolve outDir, name + '.js'
-				if not fs.existsSync(outPath) or opt.overWrite
-					content = fs.readFileSync(mainPath).toString()
-					if opt.minifyJS
-						if typeof opt.minifyJS is 'object'
-							minifyJS = opt.minifyJS
-						else
-							minifyJS = {}
-						minifyJS.fromString = true
-						try
-							content = UglifyJS.minify(content, minifyJS).code
-						catch err
-							logErr err, mainPath
-					mkdirp outDir, (err) ->
-						logErr err, mainPath if err
-						fs.writeFileSync outPath, content
-						callback true
-				else
-					callback false
+					minifyJS = {}
+				minifyJS.fromString = true
+				try
+					content = UglifyJS.minify(content, minifyJS).code
+				catch err
+					logErr err, mainPath
+			mkdirp outDir, (err) ->
+				logErr err, mainPath if err
+				fs.writeFileSync outPath, content
+				callback true
 		else
 			callback false
 	else
