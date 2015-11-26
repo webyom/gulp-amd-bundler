@@ -18,6 +18,12 @@ gulp.task 'example', ['sprite'], ->
 	gulp.src('example/src/index.js')
 		.pipe bundler
 			generateDataUri: true
+			findVendor:
+				requireBaseDir: 'example/dest'
+				outDir: 'example/dest/lib'
+				inDir: './'
+				minifyJS: true
+				overWrite: true
 			cssSprite: 
 				base: 
 					url: '//webyom.org'

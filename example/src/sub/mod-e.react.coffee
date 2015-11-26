@@ -1,3 +1,4 @@
+async = require 'async'
 modB = require '../mod-b'
 
 ModE = react.createClass

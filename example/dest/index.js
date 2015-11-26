@@ -1,5 +1,6 @@
 /* trace:example/src/index.js */
-define(['require', 'exports', 'module', './mod-a', './mod-b', './mod-x', './mod-y.react', 'lang/' + G.LANG + '/common', './inline-tpl-a.tpl.html', './inline-tpl-b.tpl.html', './sprite.css', './style.css', './style.less', './style.scss', './riot', './riot-html'], function(require, exports, module, modA) {
+define(['require', 'exports', 'module', './mod-a', 'jquery', './mod-b', './mod-x', './mod-y.react', 'lang/' + G.LANG + '/common', './inline-tpl-a.tpl.html', './inline-tpl-b.tpl.html', './sprite.css', './style.css', './style.less', './style.scss', './riot', './riot-html'], function(require, exports, module, modA) {
+	var $ = require('jquery');
 	var modB = require('./mod-b');
 	var modX = require('./mod-x');
 	var modY = require('./mod-y.react');
@@ -69,9 +70,11 @@ define('./sub/mod-d', ['require', 'exports', 'module', '../mod-b'], function(req
 });
 
 /* trace:example/src/sub/mod-e.react.coffee */
-define('./sub/mod-e.react', ['require', 'exports', 'module', '../mod-b'], function(require, exports, module) {
+define('./sub/mod-e.react', ['require', 'exports', 'module', 'async', '../mod-b'], function(require, exports, module) {
 (function() {
-  var ModE, modB;
+  var ModE, async, modB;
+
+  async = require('async');
 
   modB = require('../mod-b');
 
