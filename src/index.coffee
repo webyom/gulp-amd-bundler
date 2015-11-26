@@ -14,6 +14,8 @@ mkdirp = require 'mkdirp'
 
 EOL = '\n'
 
+_venderFoundMap = {}
+
 logErr = (err, filePath) ->
 	console.log 'Error:', err.message
 	console.log 'file:', filePath
@@ -37,7 +39,9 @@ _findVendorInDir = (inDir, outDir, name, opt, callback) ->
 			outPath = path.resolve outDir, name + opt.suffix + '.js'
 		else
 			outPath = path.resolve outDir, name + '.js'
-		if not fs.existsSync(outPath) or opt.overWrite
+		outPathExists = fs.existsSync(outPath)
+		if (not outPathExists or opt.overWrite) and not _venderFoundMap[outPath]
+			_venderFoundMap[outPath] = true
 			content = fs.readFileSync(mainPath).toString()
 			if opt.minifyJS
 				if typeof opt.minifyJS is 'object'
@@ -54,7 +58,7 @@ _findVendorInDir = (inDir, outDir, name, opt, callback) ->
 				fs.writeFileSync outPath, content
 				callback true
 		else
-			callback false
+			callback outPathExists or _venderFoundMap[outPath]
 	else
 		callback false
 
