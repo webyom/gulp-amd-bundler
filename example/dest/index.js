@@ -1,6 +1,7 @@
 /* trace:example/src/index.js */
-define(['require', 'exports', 'module', './mod-a', 'jquery', './mod-b', './mod-x', './mod-y.react', 'lang/' + G.LANG + '/common', './inline-tpl-a.tpl.html', './inline-tpl-b.tpl.html', './sprite.css', './style.css', './style.less', './style.scss', './riot', './riot-html'], function(require, exports, module, modA) {
+define(['require', 'exports', 'module', './mod-a', 'jquery', 'react', './mod-b', './mod-x', './mod-y.react', 'lang/' + G.LANG + '/common', './inline-tpl-a.tpl.html', './inline-tpl-b.tpl.html', './sprite.css', './style.css', './style.less', './style.scss', './riot', './riot-html'], function(require, exports, module, modA) {
 	var $ = require('jquery');
+	var React = require('react');
 	var modB = require('./mod-b');
 	var modX = require('./mod-x');
 	var modY = require('./mod-y.react');

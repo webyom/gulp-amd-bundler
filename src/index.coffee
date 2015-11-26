@@ -27,12 +27,16 @@ _findVendorInDir = (inDir, outDir, name, opt, callback) ->
 	if fs.existsSync packagePath
 		packageObj = require packagePath
 		if packageObj.main
-			mainPath = path.resolve moduleDir, packageObj.main
+			if opt.mainMap?[name]
+				mainPath = path.resolve moduleDir, opt.mainMap?[name]
+			else
+				mainPath = path.resolve moduleDir, packageObj.main
 			mainPath = mainPath + '.js' if path.extname(mainPath) isnt '.js'
 			if fs.existsSync mainPath
-				outPath = path.resolve outDir, path.basename(mainPath)
 				if opt.suffix
-					outPath = outPath.replace /\.js$/, opt.suffix + '.js'
+					outPath = path.resolve outDir, name + opt.suffix + '.js'
+				else
+					outPath = path.resolve outDir, name + '.js'
 				if not fs.existsSync(outPath) or opt.overWrite
 					content = fs.readFileSync(mainPath).toString()
 					if opt.minifyJS

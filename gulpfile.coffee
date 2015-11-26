@@ -25,6 +25,8 @@ gulp.task 'example', ['sprite'], ->
 				suffix: '-main'
 				minifyJS: true
 				overWrite: true
+				mainMap:
+					react: 'dist/react-with-addons.js'
 			cssSprite: 
 				base: 
 					url: '//webyom.org'
