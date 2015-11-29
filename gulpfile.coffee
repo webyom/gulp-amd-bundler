@@ -15,7 +15,7 @@ gulp.task 'sprite', ->
 
 gulp.task 'example', ['sprite'], ->
 	bundler = require './lib/index'
-	gulp.src('example/src/index.js')
+	gulp.src(['example/src/index.js'])
 		.pipe bundler
 			generateDataUri: true
 			findVendor:

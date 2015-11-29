@@ -1,8 +1,10 @@
 /* trace:example/src/index.js */
-define(['require', 'exports', 'module', './mod-a', 'jquery', 'react', './mod-b', './mod-x', './mod-y.react', 'lang/' + G.LANG + '/common', './inline-tpl-a.tpl.html', './inline-tpl-b.tpl.html', './sprite.css', './style.css', './style.less', './style.scss', './riot', './riot-html'], function(require, exports, module, modA) {
+define(['require', 'exports', 'module', './mod-a', 'jquery', 'react', './mod-b', './mod-c', './mod-d.react', './mod-x', './mod-y.react', 'lang/' + G.LANG + '/common', './inline-tpl-a.tpl.html', './inline-tpl-b.tpl.html', './sprite.css', './style.css', './style.less', './style.scss', './riot', './riot-html'], function(require, exports, module, modA) {
 	var $ = require('jquery');
 	var React = require('react');
 	var modB = require('./mod-b');
+	var modC = require('./mod-c');
+	var modD = require('./mod-d.react');
 	var modX = require('./mod-x');
 	var modY = require('./mod-y.react');
 	var lang = require('lang/' + G.LANG + '/common');
@@ -117,6 +119,46 @@ define('./mod-b', ['require', 'exports', 'module', './sub/mod-c'], function(requ
 	var modC = require('./sub/mod-c');
 
 	return {};
+});
+
+/* trace:example/src/mod-c.es6 */
+define('./mod-c', ['require', 'exports', 'module', 'react'], function(require, exports, module) {
+"use strict";
+var React = require('react');
+var Counter = function($__super) {
+  function Counter(props) {
+    $traceurRuntime.superConstructor(Counter).call(this, props);
+    this.state = {count: props.initialCount};
+  }
+  return ($traceurRuntime.createClass)(Counter, {tick: function() {
+      this.setState({count: this.state.count + 1});
+    }}, {}, $__super);
+}(React.Component);
+module.exports = Counter;
+//# sourceURL=<compile-source>
+
+});
+
+/* trace:example/src/mod-d.react.es6 */
+define('./mod-d.react', ['require', 'exports', 'module', 'react'], function(require, exports, module) {
+var React = require('react');
+
+var ____Class0=React.Component;for(var ____Class0____Key in ____Class0){if(____Class0.hasOwnProperty(____Class0____Key)){Counter[____Class0____Key]=____Class0[____Class0____Key];}}var ____SuperProtoOf____Class0=____Class0===null?null:____Class0.prototype;Counter.prototype=Object.create(____SuperProtoOf____Class0);Counter.prototype.constructor=Counter;Counter.__superConstructor__=____Class0;
+	function Counter(props) {"use strict";
+		____Class0.call(this,props);
+		this.state = {count: props.initialCount};
+	}
+	Object.defineProperty(Counter.prototype,"tick",{writable:true,configurable:true,value:function() {"use strict";
+		this.setState({count: this.state.count + 1});
+	}});
+	Object.defineProperty(Counter.prototype,"render",{writable:true,configurable:true,value:function() {"use strict";
+		return (
+			React.createElement("div", {onClick: this.tick.bind(this)})
+		);
+	}});
+
+
+module.exports = Counter;
 });
 
 /* trace:example/src/mod-x.jsx */

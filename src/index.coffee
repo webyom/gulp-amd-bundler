@@ -1,9 +1,11 @@
+_ = require 'underscore'
 Q = require 'q'
 fs = require 'fs'
 path = require 'path'
 async = require 'async'
 gutil = require 'gulp-util'
 through = require 'through2'
+traceur = require 'traceur'
 coffee = require 'gulp-coffee'
 mt2amd = require 'gulp-mt2amd'
 amdDependency = require 'gulp-amd-dependency'
@@ -13,6 +15,7 @@ UglifyJS = require 'uglify-js'
 mkdirp = require 'mkdirp'
 
 EOL = '\n'
+DEP_ID_SUFFIX_REGEXP = /\.(tag|riot\.html|js|jsx|es6|coffee)$/
 
 _venderFoundMap = {}
 
@@ -106,13 +109,13 @@ module.exports.bundle = (file, opt = {}) ->
 						if depFile._isRelative or depFile.path is file.path
 							if depFile.path is file.path
 								if baseDir
-									depId = path.relative(baseDir, depFile.path).replace /\.(tag|riot\.html|js|jsx|coffee)$/, ''
+									depId = path.relative(baseDir, depFile.path).replace DEP_ID_SUFFIX_REGEXP, ''
 								else
 									depId = ''
 								# remove inline templates srouce code
 								file.contents = new Buffer file.contents.toString().split(/(?:\r\n|\n|\r)__END__\s*(?:\r\n|\n|\r|$)/)[0]
 							else
-								depId = path.relative(baseDir || path.dirname(file.path), depFile.path).replace /\.(tag|riot\.html|js|jsx|coffee)$/, ''
+								depId = path.relative(baseDir || path.dirname(file.path), depFile.path).replace DEP_ID_SUFFIX_REGEXP, ''
 							if opt.trace
 								trace = '/* trace:' + path.relative(process.cwd(), depFile.path) + ' */' + EOL
 							else
@@ -142,10 +145,24 @@ module.exports.bundle = (file, opt = {}) ->
 									console.log 'file:', file.path
 									console.log e.stack
 								coffeeStream.end depFile
+							else if (/\.es6$/).test depFile.path
+								depContent = depFile.contents.toString()
+								if (/\.react\.es6$/).test(depFile.path) or (/(^|\r\n|\n|\r)\/\*\*\s*@jsx\s/).test(depContent)
+									reactOpt = _.extend {}, opt.reactOpt,
+										es6module: true
+										harmony: true
+									depContent = reactTools.transform depContent, reactOpt
+								else
+									depContent = traceur.compile depContent, opt.traceurOpt
+								content.push trace + mt2amd.fixDefineParams(depContent, depId, !!opt.baseDir)
+								cb()
 							else
 								depContent = depFile.contents.toString()
 								if (/\.(react\.js|jsx)$/).test(depFile.path) or (/(^|\r\n|\n|\r)\/\*\*\s*@jsx\s/).test(depContent)
-									depContent = reactTools.transform depContent, opt.reactOpt
+									reactOpt = _.extend {}, opt.reactOpt,
+										es6module: true
+										harmony: true
+									depContent = reactTools.transform depContent, reactOpt
 								content.push trace + mt2amd.fixDefineParams(depContent, depId, !!opt.baseDir)
 								cb()
 						else if opt.findVendor
@@ -182,7 +199,7 @@ module.exports.bundle = (file, opt = {}) ->
 						if (/\.tpl\.html$/).test file.path
 							file.path = file.path + '.js'
 						else
-							file.path = file.path.replace /\.coffee$/, '.js'
+							file.path = file.path.replace /\.(coffee|es6)$/, '.js'
 						file.contents = new Buffer content.join EOL + EOL
 						resolve file
 				)
