@@ -28,8 +28,13 @@ logErr = (err, filePath) ->
 
 _findVendorInDir = (inDir, outDir, name, opt, callback) ->
 	moduleDir = path.resolve inDir, name
-	if opt.mainMap?[name]
-		mainPath = path.resolve moduleDir, opt.mainMap[name]
+	mainMapped = opt.mainMap?[name]
+	if mainMapped
+		if mainMapped.indexOf('@') > 0
+			mainMapped = mainMapped.split '@'
+			moduleDir = path.resolve inDir, mainMapped[1]
+			mainMapped = mainMapped[0]
+		mainPath = path.resolve moduleDir, mainMapped
 	if not mainPath
 		packagePath = path.resolve moduleDir, 'package.json'
 		if fs.existsSync packagePath
