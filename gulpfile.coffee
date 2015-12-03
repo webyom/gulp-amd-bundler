@@ -28,6 +28,7 @@ gulp.task 'example', ['sprite'], ->
 				mainMap:
 					'react': 'dist/react.js'
 					'react-with-addons': 'dist/react-with-addons.js@react'
+					'angular-resource': '@bower-angular-resource'
 			cssSprite: 
 				base: 
 					url: '//webyom.org'
