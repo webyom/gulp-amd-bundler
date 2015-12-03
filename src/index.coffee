@@ -17,6 +17,8 @@ mkdirp = require 'mkdirp'
 EOL = '\n'
 DEP_ID_SUFFIX_REGEXP = /\.(tag|riot\.html|js|jsx|es6|coffee)$/
 
+_npmDir = 'node_modules'
+_bowerDir = 'bower_components'
 _venderFoundMap = {}
 
 logErr = (err, filePath) ->
@@ -72,12 +74,20 @@ _findVendorInDir = (inDir, outDir, name, opt, callback) ->
 	else
 		callback false
 
+_fixBowerDir = (inDir) ->
+	bowerrcPath = path.resolve inDir, '.bowerrc'
+	if fs.existsSync bowerrcPath
+		bowerrc = JSON.parse fs.readFileSync(bowerrcPath).toString()
+		_bowerDir = bowerrc.directory if bowerrc.directory
+	_fixBowerDir = ->
+	
 _findVendor = (inDir, outDir, name, opt, callback) ->
-	_findVendorInDir path.resolve(inDir, 'node_modules'), outDir, name, opt, (found) ->
+	_fixBowerDir inDir
+	_findVendorInDir path.resolve(inDir, _npmDir), outDir, name, opt, (found) ->
 		if found
 			callback()
 		else
-			_findVendorInDir path.resolve(inDir, 'bower_components'), outDir, name, opt, (found) ->
+			_findVendorInDir path.resolve(inDir, _bowerDir), outDir, name, opt, (found) ->
 				callback()
 
 module.exports = (opt = {}) ->
