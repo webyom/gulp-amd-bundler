@@ -36,14 +36,13 @@ _findVendorInDir = (inDir, outDir, name, opt, callback) ->
 			mainMapped = mainMapped[0]
 		if mainMapped
 			mainPath = path.resolve moduleDir, mainMapped
-	if not mainPath
-		packagePath = path.resolve moduleDir, 'bower.json'
-		if not fs.existsSync packagePath
-			packagePath = path.resolve moduleDir, 'package.json'
-		if fs.existsSync packagePath
-			packageObj = require packagePath
-			if packageObj.main
-				mainPath = path.resolve moduleDir, packageObj.main
+	for confFile in ['bower.json', 'package.json']
+		if not mainPath
+			packagePath = path.resolve moduleDir, confFile
+			if fs.existsSync packagePath
+				packageObj = require packagePath
+				if packageObj.main
+					mainPath = path.resolve moduleDir, packageObj.main
 	mainPath = mainPath + '.js' if mainPath and path.extname(mainPath) isnt '.js'
 	if mainPath and fs.existsSync mainPath
 		if opt.suffix
