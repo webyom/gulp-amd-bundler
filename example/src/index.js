@@ -6,7 +6,6 @@ define(['require', 'exports', 'module', './mod-a'], function(require, exports, m
 	var modB = require('./mod-b');
 	var modC = require('./mod-c');
 	var modD = require('./mod-d.react');
-	var modE = require('./mod-e');
 	var modX = require('./mod-x');
 	var modY = require('./mod-y.react');
 	var lang = require('lang/{{G.LANG}}/common');

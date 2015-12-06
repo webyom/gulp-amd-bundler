@@ -1,5 +1,5 @@
 /* trace:example/src/index.js */
-define(['require', 'exports', 'module', 'mod-a', 'jquery', 'react', 'react-with-addons', 'angular-resource', 'mod-b', 'mod-c', 'mod-d.react', 'mod-e', 'mod-x', 'mod-y.react', 'lang/' + G.LANG + '/common', 'inline-tpl-a.tpl.html', 'inline-tpl-b.tpl.html', 'sprite.css', 'style.css', 'style.less', 'style.scss', 'riot', 'riot-html'], function(require, exports, module, modA) {
+define(['require', 'exports', 'module', 'mod-a', 'jquery', 'react', 'react-with-addons', 'angular-resource', 'mod-b', 'mod-c', 'mod-d.react', 'mod-x', 'mod-y.react', 'lang/' + G.LANG + '/common', 'inline-tpl-a.tpl.html', 'inline-tpl-b.tpl.html', 'sprite.css', 'style.css', 'style.less', 'style.scss', 'riot', 'riot-html'], function(require, exports, module, modA) {
 	var $ = require('jquery');
 	var React = require('react');
 	var ReactWithAddons = require('react-with-addons');
@@ -7,7 +7,6 @@ define(['require', 'exports', 'module', 'mod-a', 'jquery', 'react', 'react-with-
 	var modB = require('mod-b');
 	var modC = require('mod-c');
 	var modD = require('mod-d.react');
-	var modE = require('mod-e');
 	var modX = require('mod-x');
 	var modY = require('mod-y.react');
 	var lang = require('lang/' + G.LANG + '/common');
@@ -162,14 +161,6 @@ var ____Class0=React.Component;for(var ____Class0____Key in ____Class0){if(____C
 
 
 module.exports = Counter;
-});
-
-/* trace:example/src/mod-e.js */
-define('mod-e', ['require', 'exports', 'module', 'react', 'mod-b'], function(require, exports, module) {
-var React = require('react');
-var modB = require('mod-b');
-exports.a = 2;
-
 });
 
 /* trace:example/src/mod-x.jsx */
