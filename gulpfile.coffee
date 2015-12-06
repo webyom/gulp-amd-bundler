@@ -17,6 +17,7 @@ gulp.task 'example', ['sprite'], ->
 	bundler = require './lib/index'
 	gulp.src(['example/src/index.js'])
 		.pipe bundler
+			baseDir: 'example/src'
 			generateDataUri: true
 			findVendor:
 				requireBaseDir: 'example/dest'

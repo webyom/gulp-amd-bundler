@@ -1,3 +1,4 @@
+child_process = require 'child_process'
 _ = require 'underscore'
 Q = require 'q'
 fs = require 'fs'
@@ -15,6 +16,7 @@ UglifyJS = require 'uglify-js'
 mkdirp = require 'mkdirp'
 
 EOL = '\n'
+EXPORTS_REGEXP = /(^|[^.])\b(module\.exports|exports\.[^.]+)\s*=[^=]/
 DEP_ID_SUFFIX_REGEXP = /\.(tag|riot\.html|js|jsx|es6|coffee)$/
 
 _npmDir = 'node_modules'
@@ -28,7 +30,71 @@ logErr = (err, filePath) ->
 		console.log 'line:', err.line
 	throw err
 
-_findVendorInDir = (inDir, outDir, name, opt, callback) ->
+getUnixStylePath = (p) ->
+	p.split(path.sep).join '/'
+
+getBodyDeps = (def, depPath, opt = {}) ->
+	deps = []
+	got = {}
+	depDir = path.dirname depPath
+	def = def.replace /(^|[^.])\brequire\s*\(\s*(["'])([^"']+?)\2\s*\)/mg, (full, lead, quote, dep) ->
+		pDep = dep.replace /\{\{([^{}]+)\}\}/g, quote + ' + $1 + ' + quote
+		if opt.baseDir and pDep.indexOf('.') is 0
+			pDep = path.relative opt.baseDir, path.resolve(depDir, pDep)
+		qDep = quote + pDep + quote
+		got[dep] || deps.push qDep
+		got[dep] = 1
+		if pDep is dep
+			full
+		else
+			lead + 'require(' + qDep + ')'
+	{
+		def: def
+		deps: deps
+	}
+
+fixDefineParams = (def, depId, depPath, opt = {}) ->
+	def = getBodyDeps def, depPath, opt
+	bodyDeps = def.deps
+	depDir = path.dirname depPath
+	fix = (full, b, d, quote, definedId, deps) ->
+		if bodyDeps.length
+			if (/^\[\s*\]$/).test deps
+				deps = "['require', 'exports', 'module', " + bodyDeps.join(', ') + "]"
+			else if deps
+				deps = deps.replace(/^\[\s*|\s*\]$/g, '').split(/\s*,\s*/)
+				if opt.baseDir
+					deps = deps.map (dep) ->
+						if dep.indexOf('.') is 1
+							dep = dep.slice 1, -1
+							dep = path.relative opt.baseDir, path.resolve(depDir, dep)
+							dep = "'#{dep}'"
+						dep
+				tmp = deps.join(',').replace(/'/g, '"').replace(/\s+/g, '').replace(/"\+"/g, '+')
+				for bodyDep in bodyDeps
+					if tmp.indexOf(bodyDep.replace(/'/g, '"').replace(/\s+/g, '').replace(/"\+"/g, '+')) is -1
+						deps.push bodyDep
+				deps = '[' + deps.join(', ') + ']'
+			else
+				deps = "['require', 'exports', 'module', " + bodyDeps.join(', ') + "], "
+		if definedId and not (/^\./).test definedId
+			id = definedId
+		else
+			id = depId || ''
+			if id and not opt.baseDir and not (/^\./).test(id)
+				id = './' + id
+		[b, d, id && ("'" + getUnixStylePath(id) + "', "), deps || "['require', 'exports', 'module'], "].join ''
+	if not (/(^|[^.])\bdefine\s*\(/).test(def.def) and EXPORTS_REGEXP.test(def.def)
+		def = [
+			fix('define(', '', 'define(') + 'function(require, exports, module) {'
+			def.def
+			'});'
+		].join EOL
+	else
+		def = def.def.replace /(^|[^.])\b(define\s*\()\s*(?:(["'])([^"'\s]+)\3\s*,\s*)?\s*(\[[^\[\]]*\])?/m, fix
+	def
+	
+findVendorInDir = (inDir, outDir, name, opt, callback) ->
 	moduleDir = path.resolve inDir, name
 	mainMapped = opt.mainMap?[name]
 	if mainMapped
@@ -74,20 +140,20 @@ _findVendorInDir = (inDir, outDir, name, opt, callback) ->
 	else
 		callback false
 
-_fixBowerDir = (inDir) ->
+fixBowerDir = (inDir) ->
 	bowerrcPath = path.resolve inDir, '.bowerrc'
 	if fs.existsSync bowerrcPath
 		bowerrc = JSON.parse fs.readFileSync(bowerrcPath).toString()
 		_bowerDir = bowerrc.directory if bowerrc.directory
-	_fixBowerDir = ->
+	fixBowerDir = ->
 	
-_findVendor = (inDir, outDir, name, opt, callback) ->
-	_fixBowerDir inDir
-	_findVendorInDir path.resolve(inDir, _npmDir), outDir, name, opt, (found) ->
+findVendor = (inDir, outDir, name, opt, callback) ->
+	fixBowerDir inDir
+	findVendorInDir path.resolve(inDir, _npmDir), outDir, name, opt, (found) ->
 		if found
 			callback()
 		else
-			_findVendorInDir path.resolve(inDir, _bowerDir), outDir, name, opt, (found) ->
+			findVendorInDir path.resolve(inDir, _bowerDir), outDir, name, opt, (found) ->
 				callback()
 
 module.exports = (opt = {}) ->
@@ -114,6 +180,7 @@ module.exports.bundle = (file, opt = {}) ->
 		depStream = amdDependency
 			excludeDependent: true
 			onlyRelative: not opt.findVendor
+			extnames: opt.dependencyExtnames
 		depStream.pipe through.obj(
 			(file, enc, next) ->
 				dependFiles.push file
@@ -124,11 +191,9 @@ module.exports.bundle = (file, opt = {}) ->
 					dependFiles
 					(depFile, cb) ->
 						if depFile._isRelative or depFile.path is file.path
+							depPath = depFile.path.replace DEP_ID_SUFFIX_REGEXP, ''
 							if depFile.path is file.path
-								if baseDir
-									depId = path.relative(baseDir, depFile.path).replace DEP_ID_SUFFIX_REGEXP, ''
-								else
-									depId = ''
+								depId = ''
 								# remove inline templates srouce code
 								file.contents = new Buffer file.contents.toString().split(/(?:\r\n|\n|\r)__END__\s*(?:\r\n|\n|\r|$)/)[0]
 							else
@@ -137,15 +202,7 @@ module.exports.bundle = (file, opt = {}) ->
 								trace = '/* trace:' + path.relative(process.cwd(), depFile.path) + ' */' + EOL
 							else
 								trace = ''
-							if (/\.(tag|riot\.html|tpl\.html|css|less|scss)$/).test depFile.path
-								mt2amd.compile(depFile, riotOpt: opt.riotOpt, postcss: opt.postcss, generateDataUri: opt.generateDataUri, cssSprite: opt.cssSprite, beautify: opt.beautifyTemplate, trace: opt.trace).then(
-									(depFile) ->
-										content.push mt2amd.fixDefineParams(depFile.contents.toString(), depId, !!opt.baseDir)
-										cb()
-									(err) ->
-										reject err
-								).done()
-							else if (/\.coffee$/).test depFile.path
+							if (/\.coffee$/).test depFile.path
 								depContent = depFile.contents.toString()
 								if (/\.react\.coffee$/).test(depFile.path) or (/(^|\r\n|\n|\r)##\s*@jsx\s/).test(depContent)
 									depContent = coffeeReactTransform depContent
@@ -153,7 +210,7 @@ module.exports.bundle = (file, opt = {}) ->
 								coffeeStream = coffee opt.coffeeOpt
 								coffeeStream.pipe through.obj(
 									(depFile, enc, next) ->
-										content.push trace + mt2amd.fixDefineParams(depFile.contents.toString(), depId, !!opt.baseDir)
+										content.push trace + fixDefineParams(depFile.contents.toString(), depId, depPath, opt)
 										cb()
 										next()
 								)
@@ -171,8 +228,16 @@ module.exports.bundle = (file, opt = {}) ->
 									depContent = reactTools.transform depContent, reactOpt
 								else
 									depContent = traceur.compile depContent, opt.traceurOpt
-								content.push trace + mt2amd.fixDefineParams(depContent, depId, !!opt.baseDir)
+								content.push trace + fixDefineParams(depContent, depId, depPath, opt)
 								cb()
+							else if (/\.(tag|riot\.html|tpl\.html|css|less|scss)$/).test depFile.path
+								mt2amd.compile(depFile, riotOpt: opt.riotOpt, postcss: opt.postcss, generateDataUri: opt.generateDataUri, cssSprite: opt.cssSprite, beautify: opt.beautifyTemplate, trace: opt.trace).then(
+									(depFile) ->
+										content.push fixDefineParams(depFile.contents.toString(), depId, depPath, opt)
+										cb()
+									(err) ->
+										reject err
+								).done()
 							else
 								depContent = depFile.contents.toString()
 								if (/\.(react\.js|jsx)$/).test(depFile.path) or (/(^|\r\n|\n|\r)\/\*\*\s*@jsx\s/).test(depContent)
@@ -180,7 +245,7 @@ module.exports.bundle = (file, opt = {}) ->
 										es6module: true
 										harmony: true
 									depContent = reactTools.transform depContent, reactOpt
-								content.push trace + mt2amd.fixDefineParams(depContent, depId, !!opt.baseDir)
+								content.push trace + fixDefineParams(depContent, depId, depPath, opt)
 								cb()
 						else if opt.findVendor
 							typeOfOpt = typeof opt.findVendor
@@ -201,12 +266,12 @@ module.exports.bundle = (file, opt = {}) ->
 							outDir = path.resolve cwd, outDir
 							fileName = depFile.path
 							if fileName.indexOf('/') is -1
-								_findVendor inDir, outDir, fileName, findVendorOpt, cb
+								findVendor inDir, outDir, fileName, findVendorOpt, cb
 							else if requireBaseDir
 								fileName = path.resolve cwd, requireBaseDir, depFile.path
 								fileName = path.relative outDir, fileName
 								if fileName and fileName.indexOf('/') is -1 and fileName.indexOf('.') is -1
-									_findVendor inDir, outDir, fileName, findVendorOpt, cb
+									findVendor inDir, outDir, fileName, findVendorOpt, cb
 								else
 									cb()
 							else
