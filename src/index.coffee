@@ -171,8 +171,6 @@ module.exports = (opt = {}) ->
 module.exports.bundle = (file, opt = {}) ->
 	baseFile = opt.baseFile
 	baseDir = opt.baseDir
-	if baseFile and not baseDir
-		baseDir = path.dirname(baseFile.path)
 	Q.Promise (resolve, reject) ->
 		return reject new gutil.PluginError('gulp-amd-bundler', 'File can\'t be null') if file.isNull()
 		return reject new gutil.PluginError('gulp-amd-bundler', 'Streams not supported') if file.isStream()
@@ -193,7 +191,10 @@ module.exports.bundle = (file, opt = {}) ->
 						if depFile._isRelative or depFile.path is file.path
 							depPath = depFile.path.replace DEP_ID_SUFFIX_REGEXP, ''
 							if depFile.path is file.path
-								depId = ''
+								if baseFile
+									depId = path.relative(baseDir || path.dirname(baseFile.path), depFile.path).replace DEP_ID_SUFFIX_REGEXP, ''
+								else
+									depId = ''
 								# remove inline templates srouce code
 								file.contents = new Buffer file.contents.toString().split(/(?:\r\n|\n|\r)__END__\s*(?:\r\n|\n|\r|$)/)[0]
 							else
