@@ -13,6 +13,7 @@ amdDependency = require 'gulp-amd-dependency'
 reactTools = require 'react-tools'
 coffeeReactTransform = require 'coffee-react-transform'
 UglifyJS = require 'uglify-js'
+CleanCSS = require 'clean-css'
 mkdirp = require 'mkdirp'
 
 EOL = '\n'
@@ -95,6 +96,7 @@ fixDefineParams = (def, depId, depPath, opt = {}) ->
 	def
 	
 findVendorInDir = (inDir, outDir, name, opt, callback) ->
+	outDir = outDir.replace /\{name\}/ig, name
 	moduleDir = path.resolve inDir, name
 	mainMapped = opt.mainMap?[name]
 	if mainMapped
@@ -104,20 +106,37 @@ findVendorInDir = (inDir, outDir, name, opt, callback) ->
 			mainMapped = mainMapped[0]
 		if mainMapped
 			mainPath = path.resolve moduleDir, mainMapped
+	mainMapped = opt.mainMap?["#{name}.css"]
+	if mainMapped
+		if mainMapped.indexOf('@') >= 0
+			mainMapped = mainMapped.split '@'
+			moduleDir = path.resolve inDir, mainMapped[1]
+			mainMapped = mainMapped[0]
+		if mainMapped
+			stylePath = path.resolve moduleDir, mainMapped
 	for confFile in ['bower.json', 'package.json']
 		if not mainPath
 			packagePath = path.resolve moduleDir, confFile
 			if fs.existsSync packagePath
 				packageObj = require packagePath
 				if packageObj.main
-					mainPath = path.resolve moduleDir, packageObj.main
+					if Array.isArray packageObj.main
+						for item in packageObj.main
+							if (/\.css$/i).test item
+								stylePath = path.resolve moduleDir, item
+							else
+								mainPath = path.resolve moduleDir, item
+					else
+						if (/\.css$/i).test packageObj.main
+							stylePath = path.resolve moduleDir, packageObj.main
+						else
+							mainPath = path.resolve moduleDir, packageObj.main
+				if packageObj.style
+					stylePath = path.resolve moduleDir, packageObj.style
 	mainPath = mainPath + '.js' if mainPath and path.extname(mainPath) isnt '.js'
 	if mainPath and fs.existsSync mainPath
-		if opt.suffix
-			outPath = path.resolve outDir, name + opt.suffix + '.js'
-		else
-			outPath = path.resolve outDir, name + '.js'
-		outPathExists = fs.existsSync(outPath)
+		outPath = path.resolve outDir, name + (opt.suffix || '')
+		outPathExists = fs.existsSync "#{outPath}.js"
 		if (not outPathExists or opt.overWrite) and not _venderFoundMap[outPath]
 			_venderFoundMap[outPath] = true
 			content = fs.readFileSync(mainPath).toString()
@@ -133,7 +152,19 @@ findVendorInDir = (inDir, outDir, name, opt, callback) ->
 					logErr err, mainPath
 			mkdirp outDir, (err) ->
 				logErr err, mainPath if err
-				fs.writeFileSync outPath, content
+				fs.writeFileSync "#{outPath}.js", content
+				if stylePath
+					content = fs.readFileSync(stylePath).toString()
+					if opt.minifyCSS
+						if typeof opt.minifyCSS is 'object'
+							minifyCSS = opt.minifyCSS
+						else
+							minifyCSS = {}
+						try
+							content = new CleanCSS(minifyCSS).minify(content).styles
+						catch err
+							logErr err, stylePath
+					fs.writeFileSync "#{outPath}.css", content
 				callback true
 		else
 			callback outPathExists or _venderFoundMap[outPath]

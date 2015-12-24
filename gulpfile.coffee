@@ -25,6 +25,7 @@ gulp.task 'example', ['sprite'], ->
 				inDir: './'
 				suffix: '-main'
 				minifyJS: true
+				minifyCSS: true
 				overWrite: true
 				mainMap:
 					'react': 'dist/react.js'

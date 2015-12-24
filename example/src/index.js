@@ -1,6 +1,7 @@
 define(['require', 'exports', 'module', './mod-a'], function(require, exports, module, modA) {
 	var $ = require('jquery');
 	var React = require('react');
+    var bootstrap = require('bootstrap');
 	var ReactWithAddons = require('react-with-addons');
 	var angularResource = require('angular-resource');
 	var modB = require('./mod-b');
