@@ -37,6 +37,11 @@ gulp.task 'example', ['sprite'], ->
 					dir: 'example/src'
 			beautifyTemplate: true
 			trace: true
+			isRelativeDependency: (dep, isRelative) ->
+				if dep is './mod-b'
+					false
+				else
+					isRelative
 		.pipe gulp.dest('example/dest')
 
 gulp.task 'default', ['compile']

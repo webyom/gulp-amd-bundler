@@ -210,6 +210,7 @@ module.exports.bundle = (file, opt = {}) ->
 			excludeDependent: true
 			onlyRelative: not opt.findVendor
 			extnames: opt.dependencyExtnames
+			isRelative: opt.isRelativeDependency
 		depStream.pipe through.obj(
 			(file, enc, next) ->
 				dependFiles.push file

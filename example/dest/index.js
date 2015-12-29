@@ -75,6 +75,13 @@ define('sub/mod-d', ['require', 'exports', 'module', 'mod-b'], function(require,
 
 });
 
+/* trace:example/src/mod-b.js */
+define('mod-b', ['require', 'exports', 'module', 'sub/mod-c'], function(require) {
+	var modC = require('sub/mod-c');
+
+	return {};
+});
+
 /* trace:example/src/sub/mod-e.react.coffee */
 define('sub/mod-e.react', ['require', 'exports', 'module', 'async', 'mod-b'], function(require, exports, module) {
 (function() {
@@ -115,13 +122,6 @@ define('sub/tpl-a.tpl.html', ["require", "exports", "module", 'mod-b'], function
         }
         return _$out_.join("");
     };
-});
-
-/* trace:example/src/mod-b.js */
-define('mod-b', ['require', 'exports', 'module', 'sub/mod-c'], function(require) {
-	var modC = require('sub/mod-c');
-
-	return {};
 });
 
 /* trace:example/src/mod-c.es6 */
