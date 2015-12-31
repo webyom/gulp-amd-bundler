@@ -41,7 +41,8 @@ getBodyDeps = (def, depPath, opt = {}) ->
 	def = def.replace /(^|[^.])\brequire\s*\(\s*(["'])([^"']+?)\2\s*\)/mg, (full, lead, quote, dep) ->
 		pDep = dep.replace /\{\{([^{}]+)\}\}/g, quote + ' + $1 + ' + quote
 		if opt.baseDir and pDep.indexOf('.') is 0
-			pDep = path.relative opt.baseDir, path.resolve(depDir, pDep)
+			tmp = path.relative opt.baseDir, path.resolve(depDir, pDep)
+			pDep = tmp if tmp.indexOf('.') isnt 0
 		qDep = quote + pDep + quote
 		got[dep] || deps.push qDep
 		got[dep] = 1
@@ -67,9 +68,9 @@ fixDefineParams = (def, depId, depPath, opt = {}) ->
 				if opt.baseDir
 					deps = deps.map (dep) ->
 						if dep.indexOf('.') is 1
-							dep = dep.slice 1, -1
-							dep = path.relative opt.baseDir, path.resolve(depDir, dep)
-							dep = "'#{dep}'"
+							tmp = dep.slice 1, -1
+							tmp = path.relative opt.baseDir, path.resolve(depDir, tmp)
+							dep = "'#{tmp}'" if tmp.indexOf('.') isnt 0
 						dep
 				tmp = deps.join(',').replace(/'/g, '"').replace(/\s+/g, '').replace(/"\+"/g, '+')
 				for bodyDep in bodyDeps
