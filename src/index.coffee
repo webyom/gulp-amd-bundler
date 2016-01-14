@@ -96,10 +96,11 @@ fixDefineParams = (def, depId, depPath, opt = {}) ->
 		def = def.def.replace /(^|[^.])\b(define\s*\()\s*(?:(["'])([^"'\s]+)\3\s*,\s*)?\s*(\[[^\[\]]*\])?/m, fix
 	def
 	
-findVendorInDir = (inDir, outDir, name, opt, callback) ->
-	outDir = outDir.replace /\{name\}/ig, name
+findVendorInDir = (inDir, outDir, depId, opt, callback) ->
+	name = depId.split('/')[0]
+	outDir = outDir + '/' +  name if opt.mkdir
 	moduleDir = path.resolve inDir, name
-	mainMapped = opt.mainMap?[name]
+	mainMapped = opt.mainMap?[depId]
 	if mainMapped
 		if mainMapped.indexOf('@') >= 0
 			mainMapped = mainMapped.split '@'
@@ -107,7 +108,7 @@ findVendorInDir = (inDir, outDir, name, opt, callback) ->
 			mainMapped = mainMapped[0]
 		if mainMapped
 			mainPath = path.resolve moduleDir, mainMapped
-	mainMapped = opt.mainMap?["#{name}.css"]
+	mainMapped = opt.mainMap?["#{depId}.css"]
 	if mainMapped
 		if mainMapped.indexOf('@') >= 0
 			mainMapped = mainMapped.split '@'
@@ -115,28 +116,37 @@ findVendorInDir = (inDir, outDir, name, opt, callback) ->
 			mainMapped = mainMapped[0]
 		if mainMapped
 			stylePath = path.resolve moduleDir, mainMapped
-	for confFile in ['bower.json', 'package.json']
-		if not mainPath
-			packagePath = path.resolve moduleDir, confFile
-			if fs.existsSync packagePath
-				packageObj = require packagePath
-				if packageObj.main
-					if Array.isArray packageObj.main
-						for item in packageObj.main
-							if (/\.css$/i).test item
-								stylePath = path.resolve moduleDir, item
+	if not mainPath
+		if depId isnt name
+			mainPath = path.resolve inDir, depId
+		else
+			for confFile in ['bower.json', 'package.json']
+				if not mainPath
+					packagePath = path.resolve moduleDir, confFile
+					if fs.existsSync packagePath
+						packageObj = require packagePath
+						if packageObj.main
+							if Array.isArray packageObj.main
+								for item in packageObj.main
+									if (/\.css$/i).test item
+										stylePath = path.resolve moduleDir, item
+									else
+										mainPath = path.resolve moduleDir, item
 							else
-								mainPath = path.resolve moduleDir, item
-					else
-						if (/\.css$/i).test packageObj.main
-							stylePath = path.resolve moduleDir, packageObj.main
-						else
-							mainPath = path.resolve moduleDir, packageObj.main
-				if packageObj.style
-					stylePath = path.resolve moduleDir, packageObj.style
-	mainPath = mainPath + '.js' if mainPath and path.extname(mainPath) isnt '.js'
+								if (/\.css$/i).test packageObj.main
+									stylePath = path.resolve moduleDir, packageObj.main
+								else
+									mainPath = path.resolve moduleDir, packageObj.main
+						if packageObj.style
+							stylePath = path.resolve moduleDir, packageObj.style
+	mainPath = path.resolve moduleDir, 'index.js' if not mainPath
+	mainPath = mainPath + '.js' if path.extname(mainPath) isnt '.js'
 	if mainPath and fs.existsSync mainPath
-		outPath = path.resolve outDir, name + (opt.suffix || '')
+		if depId isnt name and opt.mkdir
+			outId = depId.split(name + '/')[1]
+		else
+			outId = depId
+		outPath = path.resolve outDir, outId + (opt.suffix || '')
 		outPathExists = fs.existsSync "#{outPath}.js"
 		if (not outPathExists or opt.overWrite) and not _venderFoundMap[outPath]
 			_venderFoundMap[outPath] = true
@@ -151,7 +161,7 @@ findVendorInDir = (inDir, outDir, name, opt, callback) ->
 					content = UglifyJS.minify(content, minifyJS).code
 				catch err
 					logErr err, mainPath
-			mkdirp outDir, (err) ->
+			mkdirp path.dirname(outPath), (err) ->
 				logErr err, mainPath if err
 				fs.writeFileSync "#{outPath}.js", content
 				if stylePath
@@ -179,13 +189,13 @@ fixBowerDir = (inDir) ->
 		_bowerDir = bowerrc.directory if bowerrc.directory
 	fixBowerDir = ->
 	
-findVendor = (inDir, outDir, name, opt, callback) ->
+findVendor = (inDir, outDir, depId, opt, callback) ->
 	fixBowerDir inDir
-	findVendorInDir path.resolve(inDir, _npmDir), outDir, name, opt, (found) ->
+	findVendorInDir path.resolve(inDir, _npmDir), outDir, depId, opt, (found) ->
 		if found
 			callback()
 		else
-			findVendorInDir path.resolve(inDir, _bowerDir), outDir, name, opt, (found) ->
+			findVendorInDir path.resolve(inDir, _bowerDir), outDir, depId, opt, (found) ->
 				callback()
 
 module.exports = (opt = {}) ->
@@ -302,9 +312,12 @@ module.exports.bundle = (file, opt = {}) ->
 							if fileName.indexOf('/') is -1
 								findVendor inDir, outDir, fileName, findVendorOpt, cb
 							else if requireBaseDir
-								fileName = path.resolve cwd, requireBaseDir, depFile.path
-								fileName = path.relative outDir, fileName
-								if fileName and fileName.indexOf('/') is -1 and fileName.indexOf('.') is -1
+								requireBaseDir = path.resolve cwd, requireBaseDir
+								prefix = path.relative requireBaseDir, outDir
+								if prefix
+									tmp = fileName.split prefix + '/'
+									fileName = tmp[1] if not tmp[0]
+								if fileName
 									findVendor inDir, outDir, fileName, findVendorOpt, cb
 								else
 									cb()

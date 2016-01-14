@@ -1,8 +1,9 @@
 /* trace:example/src/index.js */
-define(['require', 'exports', 'module', 'mod-a', 'jquery', 'react', 'bootstrap', 'react-with-addons', 'angular-resource', 'mod-b', 'mod-c', 'mod-d.react', 'mod-x', 'mod-y.react', 'lang/' + G.LANG + '/common', 'inline-tpl-a.tpl.html', 'inline-tpl-b.tpl.html', 'sprite.css', 'style.css', 'style.less', 'style.scss', 'riot', 'riot-html'], function(require, exports, module, modA) {
+define(['require', 'exports', 'module', 'mod-a', 'jquery', 'react', 'lib/bootstrap', 'lib/bootstrap/js/alert', 'react-with-addons', 'angular-resource', 'mod-b', 'mod-c', 'mod-d.react', 'mod-x', 'mod-y.react', 'lang/' + G.LANG + '/common', 'inline-tpl-a.tpl.html', 'inline-tpl-b.tpl.html', 'sprite.css', 'style.css', 'style.less', 'style.scss', 'riot', 'riot-html'], function(require, exports, module, modA) {
 	var $ = require('jquery');
 	var React = require('react');
-    var bootstrap = require('bootstrap');
+    var bootstrap = require('lib/bootstrap');
+    var bootstrapAlert = require('lib/bootstrap/js/alert');
 	var ReactWithAddons = require('react-with-addons');
 	var angularResource = require('angular-resource');
 	var modB = require('mod-b');

@@ -23,6 +23,7 @@ gulp.task 'example', ['sprite'], ->
 				requireBaseDir: 'example/dest'
 				outDir: 'example/dest/lib'
 				inDir: './'
+				mkdir: true
 				suffix: '-main'
 				minifyJS: true
 				minifyCSS: true
