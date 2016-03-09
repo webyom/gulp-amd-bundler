@@ -274,7 +274,7 @@ module.exports.bundle = (file, opt = {}) ->
 									depContent = traceur.compile depContent, opt.traceurOpt
 								content.push trace + fixDefineParams(depContent, depId, depPath, opt)
 								cb()
-							else if (/\.(tag|riot\.html|tpl\.html|css|less|scss)$/).test depFile.path
+							else if (/\.(tag|riot\.html|tpl\.html|css|less|scss|png|jpg|jpeg|gif|svg)$/).test depFile.path
 								mt2amd.compile(depFile, riotOpt: opt.riotOpt, postcss: opt.postcss, generateDataUri: opt.generateDataUri, cssSprite: opt.cssSprite, beautify: opt.beautifyTemplate, trace: opt.trace).then(
 									(depFile) ->
 										content.push fixDefineParams(depFile.contents.toString(), depId, depPath, opt)

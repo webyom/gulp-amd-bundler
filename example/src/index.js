@@ -1,4 +1,5 @@
 define(['require', 'exports', 'module', './mod-a'], function(require, exports, module, modA) {
+	var img = require('./arrow.png');
 	var $ = require('jquery');
 	var React = require('react');
     var bootstrap = require('lib/bootstrap');
