@@ -56,6 +56,8 @@ getBodyDeps = (def, depPath, opt = {}) ->
 	}
 
 fixDefineParams = (def, depId, depPath, opt = {}) ->
+	matchDefine = def.match /(?:^|[^.])\bdefine\s*\(/g
+	return def if matchDefine && matchDefine.length > 1
 	def = getBodyDeps def, depPath, opt
 	bodyDeps = def.deps
 	depDir = path.dirname depPath
@@ -86,14 +88,16 @@ fixDefineParams = (def, depId, depPath, opt = {}) ->
 			if id and not opt.baseDir and not (/^\./).test(id)
 				id = './' + id
 		[b, d, id && ("'" + getUnixStylePath(id) + "', "), deps || "['require', 'exports', 'module'], "].join ''
-	if not (/(^|[^.])\bdefine\s*\(/).test(def.def) and EXPORTS_REGEXP.test(def.def)
+	if matchDefine
+		def = def.def.replace /(^|[^.])\b(define\s*\()\s*(?:(["'])([^"'\s]+)\3\s*,\s*)?\s*(\[[^\[\]]*\])?/m, fix
+	else if EXPORTS_REGEXP.test(def.def)
 		def = [
 			fix('define(', '', 'define(') + 'function(require, exports, module) {'
 			def.def
 			'});'
 		].join EOL
 	else
-		def = def.def.replace /(^|[^.])\b(define\s*\()\s*(?:(["'])([^"'\s]+)\3\s*,\s*)?\s*(\[[^\[\]]*\])?/m, fix
+		def = def.def
 	def
 	
 findVendorInDir = (inDir, outDir, depId, opt, callback) ->
