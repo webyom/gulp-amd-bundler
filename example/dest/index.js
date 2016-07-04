@@ -113,16 +113,16 @@ define('sub/tpl-a.tpl.html', ["require", "exports", "module", 'mod-b'], function
     }
     exports.render = function($data, $opt) {
         $data = $data || {};
-        var _$out_ = [];
+        var _$out_ = "";
         var $print = function(str) {
-            _$out_.push(str);
+            _$out_ += str;
         };
         with ($data) {
             /* trace:example/src/sub/tpl-a.tpl.html */
             var modB = require("mod-b");
-            _$out_.push("<div>Hello</div>");
+            _$out_ += "<div>Hello</div>";
         }
-        return _$out_.join("");
+        return _$out_;
     };
 });
 
@@ -211,15 +211,15 @@ define('inline-tpl-a.tpl.html', [ "require", "exports", "module" ], function(req
     }
     exports.render = function($data, $opt) {
         $data = $data || {};
-        var _$out_ = [];
+        var _$out_ = "";
         var $print = function(str) {
-            _$out_.push(str);
+            _$out_ += str;
         };
         with ($data) {
             /* trace:example/src/inline-tpl-a.tpl.html */
-            _$out_.push("<div>A</div>");
+            _$out_ += "<div>A</div>";
         }
-        return _$out_.join("");
+        return _$out_;
     };
 });
 
@@ -229,15 +229,15 @@ define('inline-tpl-b.tpl.html', [ "require", "exports", "module" ], function(req
     }
     exports.render = function($data, $opt) {
         $data = $data || {};
-        var _$out_ = [];
+        var _$out_ = "";
         var $print = function(str) {
-            _$out_.push(str);
+            _$out_ += str;
         };
         with ($data) {
             /* trace:example/src/inline-tpl-b.tpl.html */
-            _$out_.push("<div>B</div>");
+            _$out_ += "<div>B</div>";
         }
-        return _$out_.join("");
+        return _$out_;
     };
 });
 
@@ -361,7 +361,7 @@ define('riot', ["require", "exports", "module", "riot", "jquery"], function(requ
             item.done = !item.done;
             return true;
         };
-    }, "{ }");
+    });
     riot.tag2("child", "", "", "", function(opts) {});
     module.exports = "riot";
 });
@@ -394,7 +394,7 @@ define('riot-html', ["require", "exports", "module", "riot", "jquery"], function
             item.done = !item.done;
             return true;
         };
-    }, "{ }");
+    });
     riot.tag2("child", "", "", "", function(opts) {});
     module.exports = "todo";
 });
