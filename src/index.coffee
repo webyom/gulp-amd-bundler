@@ -44,7 +44,8 @@ getBodyDeps = (def, depPath, opt = {}) ->
 			tmp = path.relative opt.baseDir, path.resolve(depDir, pDep)
 			pDep = tmp if tmp.indexOf('.') isnt 0
 		qDep = quote + pDep + quote
-		got[dep] || deps.push qDep
+		if not got[dep] and dep.indexOf('*') is -1
+			deps.push qDep
 		got[dep] = 1
 		if pDep is dep
 			full
@@ -99,7 +100,7 @@ fixDefineParams = (def, depId, depPath, opt = {}) ->
 	else
 		def = def.def
 	def
-	
+
 findVendorInDir = (inDir, outDir, depId, opt, callback) ->
 	name = depId.split('/')[0]
 	outDir = outDir + '/' +  name if opt.mkdir
@@ -192,7 +193,7 @@ fixBowerDir = (inDir) ->
 		bowerrc = JSON.parse fs.readFileSync(bowerrcPath).toString()
 		_bowerDir = bowerrc.directory if bowerrc.directory
 	fixBowerDir = ->
-	
+
 findVendor = (inDir, outDir, depId, opt, callback) ->
 	fixBowerDir inDir
 	findVendorInDir path.resolve(inDir, _npmDir), outDir, depId, opt, (found) ->
