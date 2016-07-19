@@ -7,10 +7,7 @@ define(['require', 'exports', 'module', './mod-a'], function(require, exports, m
 	var ReactWithAddons = require('react-with-addons');
 	var angularResource = require('angular-resource');
 	var modB = require('./mod-b');
-	var modC = require('./mod-c');
-	var modD = require('./mod-d.react');
-	var modX = require('./mod-x');
-	var modY = require('./mod-y.react');
+	var modB = require('./mod-c.json');
 	var lang = require('lang/{{G.LANG}}/common');
 	var tplA = require('./inline-tpl-a.tpl.html');
 	var tplB = require('./inline-tpl-b.tpl.html');

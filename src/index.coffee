@@ -10,7 +10,6 @@ traceur = require 'traceur'
 coffee = require 'gulp-coffee'
 mt2amd = require 'gulp-mt2amd'
 amdDependency = require 'gulp-amd-dependency'
-reactTools = require 'react-tools'
 coffeeReactTransform = require 'coffee-react-transform'
 UglifyJS = require 'uglify-js'
 CleanCSS = require 'clean-css'
@@ -18,7 +17,7 @@ mkdirp = require 'mkdirp'
 
 EOL = '\n'
 EXPORTS_REGEXP = /(^|[^.])\b(module\.exports|exports\.[^.]+)\s*=[^=]/
-DEP_ID_SUFFIX_REGEXP = /\.(tag|riot\.html|js|jsx|es6|coffee)$/
+DEP_ID_SUFFIX_REGEXP = /\.(tag|riot\.html|js|jsx|coffee)$/i
 
 _npmDir = 'node_modules'
 _bowerDir = 'bower_components'
@@ -251,9 +250,9 @@ module.exports.bundle = (file, opt = {}) ->
 								trace = '/* trace:' + path.relative(process.cwd(), depFile.path) + ' */' + EOL
 							else
 								trace = ''
-							if (/\.coffee$/).test depFile.path
+							if (/\.coffee$/i).test depFile.path
 								depContent = depFile.contents.toString()
-								if (/\.react\.coffee$/).test(depFile.path) or (/(^|\r\n|\n|\r)##\s*@jsx\s/).test(depContent)
+								if (/\.react\.coffee$/i).test(depFile.path) or (/(^|\r\n|\n|\r)##\s*@jsx\s/).test(depContent)
 									depContent = coffeeReactTransform depContent
 									depFile.contents = new Buffer depContent
 								coffeeStream = coffee opt.coffeeOpt
@@ -268,18 +267,7 @@ module.exports.bundle = (file, opt = {}) ->
 									console.log 'file:', file.path
 									console.log e.stack
 								coffeeStream.end depFile
-							else if (/\.es6$/).test depFile.path
-								depContent = depFile.contents.toString()
-								if (/\.react\.es6$/).test(depFile.path) or (/(^|\r\n|\n|\r)\/\*\*\s*@jsx\s/).test(depContent)
-									reactOpt = _.extend {}, opt.reactOpt,
-										es6module: true
-										harmony: true
-									depContent = reactTools.transform depContent, reactOpt
-								else
-									depContent = traceur.compile depContent, opt.traceurOpt
-								content.push trace + fixDefineParams(depContent, depId, depPath, opt)
-								cb()
-							else if (/\.(tag|riot\.html|tpl\.html|css|less|scss|png|jpg|jpeg|gif|svg)$/).test depFile.path
+							else if (/\.(json|tag|riot\.html|tpl\.html|css|less|scss|png|jpg|jpeg|gif|svg)$/i).test depFile.path
 								mt2amd.compile(depFile, riotOpt: opt.riotOpt, postcss: opt.postcss, generateDataUri: opt.generateDataUri, cssSprite: opt.cssSprite, beautify: opt.beautifyTemplate, trace: opt.trace).then(
 									(depFile) ->
 										content.push fixDefineParams(depFile.contents.toString(), depId, depPath, opt)
@@ -289,11 +277,6 @@ module.exports.bundle = (file, opt = {}) ->
 								).done()
 							else
 								depContent = depFile.contents.toString()
-								if (/\.(react\.js|jsx)$/).test(depFile.path) or (/(^|\r\n|\n|\r)\/\*\*\s*@jsx\s/).test(depContent)
-									reactOpt = _.extend {}, opt.reactOpt,
-										es6module: true
-										harmony: true
-									depContent = reactTools.transform depContent, reactOpt
 								content.push trace + fixDefineParams(depContent, depId, depPath, opt)
 								cb()
 						else if opt.findVendor
@@ -330,10 +313,11 @@ module.exports.bundle = (file, opt = {}) ->
 								cb()
 					(err) ->
 						return reject err if err
-						if (/\.tpl\.html$/).test file.path
-							file.path = file.path + '.js'
-						else
-							file.path = file.path.replace /\.(coffee|es6)$/, '.js'
+						if not (/\.js$/i).test file.path
+							if (/\.coffee$/i).test file.path
+								file.path = file.path.replace /\.coffee$/i, '.js'
+							else
+								file.path = file.path + '.js'
 						file.contents = new Buffer content.join EOL + EOL
 						resolve file
 				)
