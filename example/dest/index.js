@@ -120,8 +120,10 @@ define('arrow.png', ['require', 'exports', 'module'], function(require, exports,
 });
 
 /* trace:example/src/mod-c.json */
-define('mod-c.json', ['require', 'exports', 'module'], {
+define('mod-c.json', ['require', 'exports', 'module'], function(require, exports, module) {
+module.exports = {
   "name": "webyom"
+};
 });
 
 define('inline-tpl-a.tpl.html', [ "require", "exports", "module" ], function(require, exports, module) {
