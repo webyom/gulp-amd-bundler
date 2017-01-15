@@ -15,8 +15,6 @@ define(['require', 'exports', 'module', './mod-a'], function(require, exports, m
 	var css = require('./style.css');
 	var less = require('./style.less');
 	var scss = require('./style.scss');
-	var riot = require('./riot');
-	var riotHtml = require('./riot-html');
 
 	return {};
 });
