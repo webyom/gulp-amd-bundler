@@ -16,7 +16,7 @@ mkdirp = require 'mkdirp'
 
 EOL = '\n'
 EXPORTS_REGEXP = /(^|[^.])\b(module\.exports|exports\.[^.]+)\s*=[^=]/
-DEP_ID_SUFFIX_REGEXP = /\.(tag|riot\.html|js|jsx|coffee)$/i
+DEP_ID_SUFFIX_REGEXP = /\.(js|jsx|coffee)$/i
 
 _npmDir = 'node_modules'
 _bowerDir = 'bower_components'
@@ -266,8 +266,8 @@ module.exports.bundle = (file, opt = {}) ->
 									console.log 'file:', file.path
 									console.log e.stack
 								coffeeStream.end depFile
-							else if (/\.(json|tag|riot\.html|tpl\.html|css|less|scss|png|jpg|jpeg|gif|svg)$/i).test depFile.path
-								mt2amd.compile(depFile, riotOpt: opt.riotOpt, postcss: opt.postcss, generateDataUri: opt.generateDataUri, cssSprite: opt.cssSprite, beautify: opt.beautifyTemplate, trace: opt.trace).then(
+							else if (/\.(json|tpl\.html|css|less|scss|png|jpg|jpeg|gif|svg)$/i).test depFile.path
+								mt2amd.compile(depFile, postcss: opt.postcss, generateDataUri: opt.generateDataUri, cssSprite: opt.cssSprite, beautify: opt.beautifyTemplate, trace: opt.trace).then(
 									(depFile) ->
 										content.push fixDefineParams(depFile.contents.toString(), depId, depPath, opt)
 										cb()
