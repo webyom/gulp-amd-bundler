@@ -1,6 +1,6 @@
 {
   "name": "gulp-amd-bundler",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Make an AMD moudle and its relative depended moudles into one file.",
   "keywords": [
     "amd",

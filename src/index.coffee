@@ -267,7 +267,15 @@ module.exports.bundle = (file, opt = {}) ->
 									console.log e.stack
 								coffeeStream.end depFile
 							else if (/\.(json|tpl\.html|css|less|scss|png|jpg|jpeg|gif|svg)$/i).test depFile.path
-								mt2amd.compile(depFile, postcss: opt.postcss, generateDataUri: opt.generateDataUri, cssSprite: opt.cssSprite, beautify: opt.beautifyTemplate, trace: opt.trace, cssModuleClassNameLength: opt.cssModuleClassNameLength, cssModuleClassNamePlaceholder: opt.cssModuleClassNamePlaceholder).then(
+								mt2amd.compile(depFile, {
+									postcss: opt.postcss
+									generateDataUri: opt.generateDataUri
+									cssSprite: opt.cssSprite
+									beautify: opt.beautifyTemplate
+									trace: opt.trace
+									cssModuleClassNameLength: opt.cssModuleClassNameLength
+									cssModuleClassNamePlaceholder: opt.cssModuleClassNamePlaceholder
+								}).then(
 									(depFile) ->
 										content.push fixDefineParams(depFile.contents.toString(), depId, depPath, opt)
 										cb()
