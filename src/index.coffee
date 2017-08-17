@@ -273,7 +273,7 @@ module.exports.bundle = (file, opt = {}) ->
 									cssSprite: opt.cssSprite
 									beautify: opt.beautifyTemplate
 									trace: opt.trace
-									cssModuleClassNameLength: opt.cssModuleClassNameLength
+									cssModuleClassNameGenerator: opt.cssModuleClassNameGenerator
 									cssModuleClassNamePlaceholder: opt.cssModuleClassNamePlaceholder
 								}).then(
 									(depFile) ->
