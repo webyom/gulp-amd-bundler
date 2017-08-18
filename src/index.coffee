@@ -275,6 +275,7 @@ module.exports.bundle = (file, opt = {}) ->
 									trace: opt.trace
 									cssModuleClassNameGenerator: opt.cssModuleClassNameGenerator
 									cssModuleClassNamePlaceholder: opt.cssModuleClassNamePlaceholder
+									useExternalCssModuleHelper: opt.useExternalCssModuleHelper
 								}).then(
 									(depFile) ->
 										content.push fixDefineParams(depFile.contents.toString(), depId, depPath, opt)
