@@ -182,6 +182,9 @@ define('sprite.css', ['require', 'exports', 'module'], function(require, exports
             styleTag.appendChild(document.createTextNode("/* " + moduleUri + " */\n" + cssContent + "\n"));
             window._yom_style_module_injected[moduleUri] = 1;
         }
+        function formatClassName(cn) {
+            return cn.replace(/^\s*&/, className).replace(/\s+&/g, " " + className).replace(/&/g, "");
+        }
         function moduleClassNames() {
             var cns = [];
             var args = Array.prototype.slice.call(arguments);
@@ -192,12 +195,12 @@ define('sprite.css', ['require', 'exports', 'module'], function(require, exports
                 if (typeof cn == "object") {
                     Object.keys(cn).forEach(function(k) {
                         if (cn[k]) {
-                            k = k.replace(/^&/, className).replace(/&/g, "");
+                            k = formatClassName(k);
                             k && cns.push(k);
                         }
                     });
                 } else {
-                    cn = cn.replace(/^&/, className).replace(/&/g, "");
+                    cn = formatClassName(cn);
                     cn && cns.push(cn);
                 }
             });
@@ -232,6 +235,9 @@ define('style.css', ['require', 'exports', 'module'], function(require, exports,
             styleTag.appendChild(document.createTextNode("/* " + moduleUri + " */\n" + cssContent + "\n"));
             window._yom_style_module_injected[moduleUri] = 1;
         }
+        function formatClassName(cn) {
+            return cn.replace(/^\s*&/, className).replace(/\s+&/g, " " + className).replace(/&/g, "");
+        }
         function moduleClassNames() {
             var cns = [];
             var args = Array.prototype.slice.call(arguments);
@@ -242,12 +248,12 @@ define('style.css', ['require', 'exports', 'module'], function(require, exports,
                 if (typeof cn == "object") {
                     Object.keys(cn).forEach(function(k) {
                         if (cn[k]) {
-                            k = k.replace(/^&/, className).replace(/&/g, "");
+                            k = formatClassName(k);
                             k && cns.push(k);
                         }
                     });
                 } else {
-                    cn = cn.replace(/^&/, className).replace(/&/g, "");
+                    cn = formatClassName(cn);
                     cn && cns.push(cn);
                 }
             });
@@ -282,6 +288,9 @@ define('style.less', ['require', 'exports', 'module'], function(require, exports
             styleTag.appendChild(document.createTextNode("/* " + moduleUri + " */\n" + cssContent + "\n"));
             window._yom_style_module_injected[moduleUri] = 1;
         }
+        function formatClassName(cn) {
+            return cn.replace(/^\s*&/, className).replace(/\s+&/g, " " + className).replace(/&/g, "");
+        }
         function moduleClassNames() {
             var cns = [];
             var args = Array.prototype.slice.call(arguments);
@@ -292,12 +301,12 @@ define('style.less', ['require', 'exports', 'module'], function(require, exports
                 if (typeof cn == "object") {
                     Object.keys(cn).forEach(function(k) {
                         if (cn[k]) {
-                            k = k.replace(/^&/, className).replace(/&/g, "");
+                            k = formatClassName(k);
                             k && cns.push(k);
                         }
                     });
                 } else {
-                    cn = cn.replace(/^&/, className).replace(/&/g, "");
+                    cn = formatClassName(cn);
                     cn && cns.push(cn);
                 }
             });
@@ -332,6 +341,9 @@ define('style.scss', ['require', 'exports', 'module'], function(require, exports
             styleTag.appendChild(document.createTextNode("/* " + moduleUri + " */\n" + cssContent + "\n"));
             window._yom_style_module_injected[moduleUri] = 1;
         }
+        function formatClassName(cn) {
+            return cn.replace(/^\s*&/, className).replace(/\s+&/g, " " + className).replace(/&/g, "");
+        }
         function moduleClassNames() {
             var cns = [];
             var args = Array.prototype.slice.call(arguments);
@@ -342,12 +354,12 @@ define('style.scss', ['require', 'exports', 'module'], function(require, exports
                 if (typeof cn == "object") {
                     Object.keys(cn).forEach(function(k) {
                         if (cn[k]) {
-                            k = k.replace(/^&/, className).replace(/&/g, "");
+                            k = formatClassName(k);
                             k && cns.push(k);
                         }
                     });
                 } else {
-                    cn = cn.replace(/^&/, className).replace(/&/g, "");
+                    cn = formatClassName(cn);
                     cn && cns.push(cn);
                 }
             });
