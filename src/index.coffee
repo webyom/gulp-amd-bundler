@@ -4,7 +4,7 @@ Q = require 'q'
 fs = require 'fs'
 path = require 'path'
 async = require 'async'
-gutil = require 'gulp-util'
+PluginError = require 'plugin-error'
 through = require 'through2'
 coffee = require 'gulp-coffee'
 mt2amd = require 'gulp-mt2amd'
@@ -203,22 +203,22 @@ findVendor = (inDir, outDir, depId, opt, callback) ->
 
 module.exports = (opt = {}) ->
 	through.obj (file, enc, next) ->
-		return @emit 'error', new gutil.PluginError('gulp-amd-bundler', 'File can\'t be null') if file.isNull()
-		return @emit 'error', new gutil.PluginError('gulp-amd-bundler', 'Streams not supported') if file.isStream()
+		return @emit 'error', new PluginError('gulp-amd-bundler', 'File can\'t be null') if file.isNull()
+		return @emit 'error', new PluginError('gulp-amd-bundler', 'Streams not supported') if file.isStream()
 		module.exports.bundle(file, opt).then(
 			(file) =>
 				@push file
 				next()
 			(err) =>
-				@emit 'error', new gutil.PluginError('gulp-amd-bundler', err)
+				@emit 'error', new PluginError('gulp-amd-bundler', err)
 		).done()
 
 module.exports.bundle = (file, opt = {}) ->
 	baseFile = opt.baseFile
 	baseDir = opt.baseDir
 	Q.Promise (resolve, reject) ->
-		return reject new gutil.PluginError('gulp-amd-bundler', 'File can\'t be null') if file.isNull()
-		return reject new gutil.PluginError('gulp-amd-bundler', 'Streams not supported') if file.isStream()
+		return reject new PluginError('gulp-amd-bundler', 'File can\'t be null') if file.isNull()
+		return reject new PluginError('gulp-amd-bundler', 'Streams not supported') if file.isStream()
 		dependFiles = [file]
 		depStream = amdDependency
 			excludeDependent: true
