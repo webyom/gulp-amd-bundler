@@ -47,13 +47,8 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "async": "^0.9.0",
-    "bootstrap": "^3.3.6",
-    "bower-angular-resource": "0.0.0",
     "coffee-script": "^1.7.1",
     "gulp": "^3.8.5",
-    "gulp-coffee": "^2.0.1",
-    "jquery": "^2.1.4",
-    "react": "^0.14.3"
+    "gulp-coffee": "^2.0.1"
   }
 }
