@@ -99,108 +99,6 @@ fixDefineParams = (def, depId, depPath, opt = {}) ->
 		def = def.def
 	def
 
-findVendorInDir = (inDir, outDir, depId, opt, callback) ->
-	name = depId.split('/')[0]
-	outDir = outDir + '/' +  name if opt.mkdir
-	moduleDir = path.resolve inDir, name
-	mainMapped = opt.mainMap?[depId]
-	if mainMapped
-		if mainMapped.indexOf('@') >= 0
-			mainMapped = mainMapped.split '@'
-			moduleDir = path.resolve inDir, mainMapped[1]
-			mainMapped = mainMapped[0]
-		if mainMapped
-			mainPath = path.resolve moduleDir, mainMapped
-	mainMapped = opt.mainMap?["#{depId}.css"]
-	if mainMapped
-		if mainMapped.indexOf('@') >= 0
-			mainMapped = mainMapped.split '@'
-			moduleDir = path.resolve inDir, mainMapped[1]
-			mainMapped = mainMapped[0]
-		if mainMapped
-			stylePath = path.resolve moduleDir, mainMapped
-	if not mainPath
-		if depId isnt name
-			mainPath = path.resolve inDir, depId
-		else
-			for confFile in ['bower.json', 'package.json']
-				if not mainPath
-					packagePath = path.resolve moduleDir, confFile
-					if fs.existsSync packagePath
-						packageObj = require packagePath
-						if packageObj.main
-							if Array.isArray packageObj.main
-								for item in packageObj.main
-									if (/\.css$/i).test item
-										stylePath = path.resolve moduleDir, item
-									else
-										mainPath = path.resolve moduleDir, item
-							else
-								if (/\.css$/i).test packageObj.main
-									stylePath = path.resolve moduleDir, packageObj.main
-								else
-									mainPath = path.resolve moduleDir, packageObj.main
-						if packageObj.style
-							stylePath = path.resolve moduleDir, packageObj.style
-	mainPath = path.resolve moduleDir, 'index.js' if not mainPath
-	mainPath = mainPath + '.js' if path.extname(mainPath) isnt '.js'
-	if mainPath and fs.existsSync mainPath
-		if depId isnt name and opt.mkdir
-			outId = depId.split(name + '/')[1]
-		else
-			outId = depId
-		outPath = path.resolve outDir, outId + (opt.suffix || '')
-		outPathExists = fs.existsSync "#{outPath}.js"
-		if (not outPathExists or opt.overWrite) and not _venderFoundMap[outPath]
-			_venderFoundMap[outPath] = true
-			content = fs.readFileSync(mainPath).toString()
-			if opt.minifyJS
-				if typeof opt.minifyJS is 'object'
-					minifyJS = opt.minifyJS
-				else
-					minifyJS = {}
-				minifyJS.fromString = true
-				try
-					content = UglifyJS.minify(content, minifyJS).code
-				catch err
-					logErr err, mainPath
-			mkdirp path.dirname(outPath), (err) ->
-				logErr err, mainPath if err
-				fs.writeFileSync "#{outPath}.js", content
-				if stylePath
-					content = fs.readFileSync(stylePath).toString()
-					if opt.minifyCSS
-						if typeof opt.minifyCSS is 'object'
-							minifyCSS = opt.minifyCSS
-						else
-							minifyCSS = {}
-						try
-							content = new CleanCSS(minifyCSS).minify(content).styles
-						catch err
-							logErr err, stylePath
-					fs.writeFileSync "#{outPath}.css", content
-				callback true
-		else
-			callback outPathExists or _venderFoundMap[outPath]
-	else
-		callback false
-
-fixBowerDir = (inDir) ->
-	bowerrcPath = path.resolve inDir, '.bowerrc'
-	if fs.existsSync bowerrcPath
-		bowerrc = JSON.parse fs.readFileSync(bowerrcPath).toString()
-		_bowerDir = bowerrc.directory if bowerrc.directory
-	fixBowerDir = ->
-
-findVendor = (inDir, outDir, depId, opt, callback) ->
-	fixBowerDir inDir
-	findVendorInDir path.resolve(inDir, _npmDir), outDir, depId, opt, (found) ->
-		if found
-			callback()
-		else
-			findVendorInDir path.resolve(inDir, _bowerDir), outDir, depId, opt, (found) ->
-				callback()
-
 module.exports = (opt = {}) ->
 	through.obj (file, enc, next) ->
 		return @emit 'error', new PluginError('gulp-amd-bundler', 'File can\'t be null') if file.isNull()
@@ -222,7 +120,7 @@ module.exports.bundle = (file, opt = {}) ->
 		dependFiles = [file]
 		depStream = amdDependency
 			excludeDependent: true
-			onlyRelative: not opt.findVendor
+			onlyRelative: true
 			extnames: opt.dependencyExtnames
 			isRelative: opt.isRelativeDependency
 		depStream.pipe through.obj(
@@ -286,38 +184,6 @@ module.exports.bundle = (file, opt = {}) ->
 							else
 								depContent = depFile.contents.toString()
 								content.push trace + fixDefineParams(depContent, depId, depPath, opt)
-								cb()
-						else if opt.findVendor
-							typeOfOpt = typeof opt.findVendor
-							findVendorOpt = {}
-							if typeOfOpt is 'object'
-								findVendorOpt = opt.findVendor
-								requireBaseDir = findVendorOpt.requireBaseDir
-								outDir = findVendorOpt.outDir
-								inDir = findVendorOpt.inDir || './'
-							else if typeOfOpt is 'string'
-								outDir = opt.findVendor
-								inDir = './'
-							else
-								outDir = 'js/vendor'
-								inDir = './'
-							cwd = process.cwd()
-							inDir = path.resolve cwd, inDir
-							outDir = path.resolve cwd, outDir
-							fileName = depFile.path
-							if fileName.indexOf('/') is -1
-								findVendor inDir, outDir, fileName, findVendorOpt, cb
-							else if requireBaseDir
-								requireBaseDir = path.resolve cwd, requireBaseDir
-								prefix = path.relative requireBaseDir, outDir
-								if prefix
-									tmp = fileName.split prefix + '/'
-									fileName = tmp[1] if not tmp[0]
-								if fileName
-									findVendor inDir, outDir, fileName, findVendorOpt, cb
-								else
-									cb()
-							else
 								cb()
 					(err) ->
 						return reject err if err

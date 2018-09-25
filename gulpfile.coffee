@@ -19,19 +19,6 @@ gulp.task 'example', ['sprite'], ->
 		.pipe bundler
 			baseDir: 'example/src'
 			generateDataUri: true
-			findVendor:
-				requireBaseDir: 'example/dest'
-				outDir: 'example/dest/lib'
-				inDir: './'
-				mkdir: true
-				suffix: '-main'
-				minifyJS: true
-				minifyCSS: true
-				overWrite: true
-				mainMap:
-					'react': 'dist/react.js'
-					'react-with-addons': 'dist/react-with-addons.js@react'
-					'angular-resource': '@bower-angular-resource'
 			cssSprite: 
 				base: 
 					url: '//webyom.org'
