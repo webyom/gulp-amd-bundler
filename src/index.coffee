@@ -139,8 +139,6 @@ module.exports.bundle = (file, opt = {}) ->
 									depId = path.relative(baseDir || path.dirname(baseFile.path), depFile.path).replace DEP_ID_SUFFIX_REGEXP, ''
 								else
 									depId = ''
-								# remove inline templates srouce code
-								file.contents = new Buffer file.contents.toString().split(/(?:\r\n|\n|\r)__END__\s*(?:\r\n|\n|\r|$)/)[0]
 							else
 								depId = path.relative(baseDir || path.dirname(file.path), depFile.path).replace DEP_ID_SUFFIX_REGEXP, ''
 							if opt.trace
