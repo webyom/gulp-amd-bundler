@@ -170,6 +170,8 @@ module.exports.bundle = (file, opt = {}) ->
 									generateDataUri: opt.generateDataUri
 									cssSprite: opt.cssSprite
 									beautify: opt.beautifyTemplate
+									strictMode: opt.strictModeTemplate
+									babel: opt.babelTemplate
 									trace: opt.trace
 									cssModuleClassNameGenerator: opt.cssModuleClassNameGenerator
 									cssModuleClassNamePlaceholder: opt.cssModuleClassNamePlaceholder
