@@ -164,7 +164,7 @@ module.exports.bundle = (file, opt = {}) ->
 									console.log 'file:', file.path
 									console.log e.stack
 								coffeeStream.end depFile
-							else if (/\.(json|tpl\.html|css|less|scss|png|jpg|jpeg|gif|svg)$/i).test depFile.path
+							else if (/\.(json|md|tpl\.html|css|less|scss|png|jpg|jpeg|gif|svg)$/i).test depFile.path
 								mt2amd.compile(depFile, {
 									postcss: opt.postcss
 									generateDataUri: opt.generateDataUri
@@ -173,6 +173,7 @@ module.exports.bundle = (file, opt = {}) ->
 									strictMode: opt.strictModeTemplate
 									babel: opt.babelTemplate
 									trace: opt.trace
+									markedOptions: opt.markedOptions
 									cssModuleClassNameGenerator: opt.cssModuleClassNameGenerator
 									cssModuleClassNamePlaceholder: opt.cssModuleClassNamePlaceholder
 									useExternalCssModuleHelper: opt.useExternalCssModuleHelper
