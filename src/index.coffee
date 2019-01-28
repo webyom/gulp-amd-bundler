@@ -77,7 +77,7 @@ fixDefineParams = (def, depId, depPath, opt = {}) ->
 				for bodyDep in bodyDeps
 					if tmp.indexOf(bodyDep.replace(/'/g, '"').replace(/\s+/g, '').replace(/"\+"/g, '+')) is -1
 						deps.push bodyDep
-				deps = '[' + deps.join(', ') + ']'
+				deps = '[' + deps.join(',').replace(/,(['"])/g, ', $1') + ']'
 			else
 				deps = "['require', 'exports', 'module', " + bodyDeps.join(', ') + "], "
 		if definedId and not (/^\./).test definedId
