@@ -24,6 +24,7 @@ gulp.task 'example', ['sprite'], ->
 					url: '//webyom.org'
 					dir: 'example/src'
 			beautifyTemplate: true
+			conservativeCollapseTemplate: true
 			trace: true
 			isRelativeDependency: (dep, isRelative) ->
 				if dep is './mod-b'
