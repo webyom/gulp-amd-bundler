@@ -140,7 +140,7 @@ module.exports.bundle = (file, opt = {}) ->
 								else
 									depId = ''
 								# remove inline templates srouce code
-								file.contents = new Buffer file.contents.toString().split(/(?:\r\n|\n|\r)__END__\s*(?:\r\n|\n|\r|$)/)[0]
+								file.contents = Buffer.from file.contents.toString().split(/(?:\r\n|\n|\r)__END__\s*(?:\r\n|\n|\r|$)/)[0]
 							else
 								depId = path.relative(baseDir || path.dirname(file.path), depFile.path).replace DEP_ID_SUFFIX_REGEXP, ''
 							if opt.trace
@@ -151,7 +151,7 @@ module.exports.bundle = (file, opt = {}) ->
 								depContent = depFile.contents.toString()
 								if (/\.react\.coffee$/i).test(depFile.path) or (/(^|\r\n|\n|\r)##\s*@jsx\s/).test(depContent)
 									depContent = coffeeReactTransform depContent
-									depFile.contents = new Buffer depContent
+									depFile.contents = Buffer.from depContent
 								coffeeStream = coffee opt.coffeeOpt
 								coffeeStream.pipe through.obj(
 									(depFile, enc, next) ->
@@ -196,7 +196,7 @@ module.exports.bundle = (file, opt = {}) ->
 								file.path = file.path.replace /\.coffee$/i, '.js'
 							else
 								file.path = file.path + '.js'
-						file.contents = new Buffer content.join EOL + EOL
+						file.contents = Buffer.from content.join EOL + EOL
 						resolve file
 				)
 		)
