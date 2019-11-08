@@ -33,7 +33,7 @@
   "scripts": {},
   "dependencies": {
     "async": "^0.9.0",
-    "clean-css": "^3.4.8",
+    "clean-css": "^4.1.11",
     "coffee-react-transform": "^4.0.0",
     "gulp-amd-dependency": "^1.10.0",
     "gulp-coffee": "^2.0.1",
