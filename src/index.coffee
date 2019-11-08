@@ -171,6 +171,7 @@ module.exports.bundle = (file, opt = {}) ->
 									cssSprite: opt.cssSprite
 									beautify: opt.beautifyTemplate
 									strictMode: opt.strictModeTemplate
+									dataInjection: opt.dataInjectionTemplate
 									conservativeCollapse: opt.conservativeCollapseTemplate
 									babel: opt.babel
 									trace: opt.trace
